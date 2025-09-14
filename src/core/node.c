@@ -1,57 +1,76 @@
 #include <stdlib.h>
-#include <string.h>
 
 
 #include "core.h"
 
 
-struct node_t* create_variable(struct node_t* parent, depth_t* var) {
+struct node_t* create_variable(struct node_t* parent, struct node_t* ref) {
 
 	struct node_t* n_var = malloc(sizeof(*n_var));
 
-	n_var->parent = (struct node_t*)parent;
 	n_var->type	  = Variable;
-	n_var->var	  = var;
+	n_var->parent = parent;
+	n_var->ref	  = ref;
 
 	return n_var;
 }
-
 
 struct node_t* create_function(struct node_t* parent, struct node_t* body) {
 
 	struct node_t* n_func = malloc(sizeof(*n_func));
 
-	n_func->parent	   = parent;
-	n_func->type	   = Function;
-	n_func->func.body  = body;
-	n_func->func.depth = 0;
+	n_func->type   = Function;
+	n_func->parent = parent;
+	n_func->body   = body;
+	n_func->depth  = 0;
 
 	return n_func;
 }
-
 
 struct node_t* create_application(struct node_t* parent, struct node_t* func, struct node_t* arg) {
 
 	struct node_t* n_apply = malloc(sizeof(*n_apply));
 
-	n_apply->parent		= parent;
-	n_apply->type		= Application;
-	n_apply->apply.func = func;
-	n_apply->apply.arg	= arg;
+	n_apply->type	= Application;
+	n_apply->parent = parent;
+	n_apply->func	= func;
+	n_apply->arg	= arg;
 
 	return n_apply;
 }
 
+struct node_t* create_macro(struct node_t* parent, struct token_t* token) {
 
-struct node_t* create_root(struct node_t* parent, struct node_t* child) {
+	struct node_t* n_macro = malloc(sizeof(*n_macro));
 
-	struct node_t* n_root = malloc(sizeof(*n_root));
+	n_macro->type	= Macro;
+	n_macro->parent = parent;
+	n_macro->token	= token;
 
-	n_root->parent = parent;
-	n_root->type   = Root;
-	n_root->child  = child;
+	return n_macro;
+}
 
-	return n_root;
+struct node_t* create_directive(struct node_t* parent, directive_t dire, enum dire_type_t dire_type) {
+
+	struct node_t* n_dire = malloc(sizeof(*n_dire));
+
+	n_dire->type	  = Directive;
+	n_dire->parent	  = parent;
+	n_dire->dire	  = dire;
+	n_dire->dire_type = dire_type;
+
+	return n_dire;
+}
+
+
+struct node_t* reset_node(struct node_t* node) {
+
+	struct node_t* n_node = copy_node(node);
+
+	update_node_parent(n_node, node->parent);
+	free_node(node);
+
+	return n_node;
 }
 
 
@@ -61,19 +80,22 @@ struct node_t* copy_node(struct node_t* node) {
 		return NULL;
 	}
 
-	struct node_t* n_node;
-
 	switch (node->type) {
-		case Variable:	  n_node = create_variable(NULL, node->var); break;
-		case Application: n_node = create_application(NULL, copy_node(node->apply.func), copy_node(node->apply.arg)); break;
-		case Root:		  n_node = create_root(NULL, copy_node(node->child)); break;
-		case Function:
-			n_node = create_function(NULL, copy_node(node->func.body));
-			update_node_var(n_node->func.body, &node->func.depth, &n_node->func.depth);
-			break;
-	}
+		case Variable:	  return create_variable(NULL, node->ref); break;
+		case Application: return create_application(NULL, copy_node(node->func), copy_node(node->arg)); break;
+		case Macro:		  return create_macro(NULL, node->token); break;
+		case Directive:	  return create_directive(NULL, node->dire, node->dire_type); break;
 
-	return n_node;
+		case Function: {
+
+			struct node_t* n_node = create_function(NULL, copy_node(node->body));
+			update_node_ref(n_node->body, node, n_node);
+			return n_node;
+
+			break;
+		}
+	}
+	return NULL;
 }
 
 
@@ -84,12 +106,11 @@ void free_node(struct node_t* node) {
 	}
 
 	switch (node->type) {
-		case Variable: break;
-		case Function: free_node(node->func.body); break;
-		case Root:	   free_node(node->child); break;
+		default:	   break;
+		case Function: free_node(node->body); break;
 		case Application:
-			free_node(node->apply.func);
-			free_node(node->apply.arg);
+			free_node(node->func);
+			free_node(node->arg);
 			break;
 	}
 

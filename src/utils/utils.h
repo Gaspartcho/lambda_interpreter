@@ -1,21 +1,10 @@
-#include <stddef.h>
+#pragma once
 
 
-#define TO_CHAR(str) str[0]
+#include "../core/core.h"
 
 
+extern struct token_t* get_token_by_ref(struct array_t* array, struct node_t* ref);
+extern struct token_t* get_token_by_name(struct array_t* array, name_t name);
 
-struct array_t {
-	size_t size;
-	size_t capacity;
-	void* content[];
-};
-
-
-struct array_t* init_array(size_t size);
-struct array_t* copy_array(struct array_t* array);
-void add_array_elem(struct array_t* array, void* elem);
-void set_array_elem(struct array_t* array, void* elem, size_t index);
-void* get_array_elem(struct array_t* array, size_t index);
-void* pop_array(struct array_t* array);
-void free_array(struct array_t* array);
+extern void free_mac_token(void* token);
