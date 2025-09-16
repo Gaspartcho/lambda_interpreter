@@ -4,6 +4,9 @@
 #include <stddef.h>
 
 
+#define DEFAULT_ARRAY_LENGTH 6 // Insanely arbitrary value
+
+
 struct array_t {
 	size_t size;
 	size_t capacity;

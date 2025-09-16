@@ -10,6 +10,8 @@
 #define E_EPT_TOK_NAME E_PARSE_NODE ": empty token name"
 #define E_DIRE_NIMPL   "Directive not implemented yet"
 #define E_INV_TYPE	   "Invalid node type"
+#define E_DEF_MAC	   "Macro already defined"
+#define E_UDEF_MAC	   "Macro not defined yet"
 
 
 void error(char error_message[]);

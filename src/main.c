@@ -10,7 +10,7 @@ int main(int argc, char* argv[]) {
 
 	if (argc != 2) error(E);
 
-	struct array_t* mac_array = init_array(10, free_mac_token);
+	struct array_t* mac_array = init_array(DEFAULT_ARRAY_LENGTH, free_mac_token);
 	run_file(argv[1], mac_array);
 	free_array(mac_array);
 

@@ -1,8 +1,10 @@
+#include <errno.h>
 #include <stdlib.h>
 
 
-#include "../utils/utils.h"
 #include "core.h"
+#include "../utils/utils.h"
+#include "../error/error.h"
 
 
 void update_node_ref(struct node_t* node, struct node_t* old_ref, struct node_t* new_ref) {
@@ -135,6 +137,7 @@ bool beta_reduce(struct node_t** node, struct array_t* mac_array) {
 		default:	   return false; break;
 		case Function: return beta_reduce(&(*node)->body, mac_array); break;
 		case Macro:
+			if ((*node)->token->ref == NULL) error_s(E_UDEF_MAC, (*node)->token->name);
 			n_node = copy_node((*node)->token->ref);
 			free_node(*node);
 			*node = n_node;
@@ -145,7 +148,8 @@ bool beta_reduce(struct node_t** node, struct array_t* mac_array) {
 			switch ((*node)->func->type) {
 				default: return beta_reduce(&(*node)->func, mac_array) || beta_reduce(&(*node)->arg, mac_array); break;
 				case Function:
-					n_node = copy_node((*node)->func->body);
+					n_node = (*node)->func->body;
+					(*node)->func->body = NULL;
 					replace_var(&n_node, (*node)->arg, (*node)->func);
 					break;
 				case Directive:

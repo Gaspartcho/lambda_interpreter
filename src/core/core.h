@@ -27,11 +27,13 @@ enum type_t {
 };
 
 enum dire_type_t {
+	d_Macro,
 	d_Display,
 	d_Tree,
-	d_Eval,
-	d_Evonce,
-	d_Macro,
+	d_Display_E,
+	d_Display_EO,
+	d_Tree_E,
+	d_Tree_EO,
 };
 
 

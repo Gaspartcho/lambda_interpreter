@@ -74,14 +74,16 @@ size_t get_node_str(char** buffer, struct node_t* node) {
 		}
 
 		case Directive: {
-			length	= 2;
+			length	= 3;
 			*buffer = malloc(sizeof(**buffer) * length);
 			switch (node->dire_type) {
-				case d_Display: sprintf(*buffer, "%c%c", DISPLAY, '\0'); break;
-				case d_Tree:	sprintf(*buffer, "%c%c", TREE, '\0'); break;
-				case d_Eval:	sprintf(*buffer, "%c%c", EVAL, '\0'); break;
-				case d_Evonce:	sprintf(*buffer, "%c%c", EVAL_ONCE, '\0'); break;
-				case d_Macro:	sprintf(*buffer, "%c%c", MACRO, '\0'); break;
+				case d_Macro:	   sprintf(*buffer, "%c", MACRO); break;
+				case d_Display:	   sprintf(*buffer, "%c", DISPLAY); break;
+				case d_Tree:	   sprintf(*buffer, "%c", TREE); break;
+				case d_Display_E:  sprintf(*buffer, "%c%c", DISPLAY, EVAL); break;
+				case d_Display_EO: sprintf(*buffer, "%c%c", DISPLAY, EVAL_ONCE); break;
+				case d_Tree_E:	   sprintf(*buffer, "%c%c", TREE, EVAL); break;
+				case d_Tree_EO:	   sprintf(*buffer, "%c%c", TREE, EVAL_ONCE); break;
 			}
 			break;
 		}
