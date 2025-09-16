@@ -1,5 +1,7 @@
 # Specification for the Lambda prog (\lprog) language
 
+!!! INSANELY OUTDATED !!!
+
 ## Elements
 
 ### In-language elements
