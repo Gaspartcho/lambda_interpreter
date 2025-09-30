@@ -19,11 +19,15 @@
 #define TREE		  '#'
 #define EVAL		  '$'
 #define EVAL_ONCE	  '!'
+#define EVAL_EACH	  '?'
 #define MACRO		  '@'
+#define FACTORIZE	  '-'
+#define EXPAND		  '+'
+#define INCLUDE		  '*'
 #define COMMENT_OPEN  '%'
 #define COMMENT_CLOSE '%'
-#define OPEN_STRING	  '\"'
-#define CLOSE_STRING  '\"'
+#define STRING_OPEN	  '\"'
+#define STRING_CLOSE  '\"'
 #define EMPTY		  '\0'
 
 #define NB_LETTERS 26
@@ -39,17 +43,18 @@ struct parser_t {
 
 
 extern bool			  get_parser_next_char(struct parser_t* parser);
-extern struct node_t* parse_next_node(struct parser_t* parser, struct array_t* var_array, struct array_t* mac_array);
+extern struct node_t* parse_next_node(struct parser_t* parser, struct array_t* var_array, struct array_t* mac_array, struct array_t* str_array);
 
-extern void	  run_file(const char filename[], struct array_t* mac_array);
+void		  run_file(char filename[], struct array_t* mac_array, struct array_t* str_array);
 extern size_t get_node_str(char** buffer, struct node_t* node);
 
-extern struct node_t* macro(struct node_t* node, struct array_t* mac_array);
-extern struct node_t* evaluate(struct node_t* node, struct array_t* mac_array);
-extern struct node_t* eval_once(struct node_t* node, struct array_t* mac_array);
-extern struct node_t* display(struct node_t* node, struct array_t* mac_array);
-extern struct node_t* tree(struct node_t* node, struct array_t* mac_array);
-extern struct node_t* display_eval(struct node_t* node, struct array_t* mac_array);
-extern struct node_t* display_eval_once(struct node_t* node, struct array_t* mac_array);
-extern struct node_t* tree_eval(struct node_t* node, struct array_t* mac_array);
-extern struct node_t* tree_eval_once(struct node_t* node, struct array_t* mac_array);
+extern struct node_t* d_identity(struct node_t* node, bool* valid, struct array_t* mac_array, struct array_t* str_array);
+extern struct node_t* d_macro(struct node_t* node, bool* valid, struct array_t* mac_array, struct array_t* str_array);
+extern struct node_t* d_factorize(struct node_t* node, bool* valid, struct array_t* mac_array, struct array_t* str_array);
+extern struct node_t* d_expand(struct node_t* node, bool* valid, struct array_t* mac_array, struct array_t* str_array);
+extern struct node_t* d_display(struct node_t* node, bool* valid, struct array_t* mac_array, struct array_t* str_array);
+extern struct node_t* d_tree(struct node_t* node, bool* valid, struct array_t* mac_array, struct array_t* str_array);
+extern struct node_t* d_evaluate(struct node_t* node, bool* valid, struct array_t* mac_array, struct array_t* str_array);
+extern struct node_t* d_eval_once(struct node_t* node, bool* valid, struct array_t* mac_array, struct array_t* str_array);
+extern struct node_t* d_eval_each(struct node_t* node, bool* valid, struct array_t* mac_array, struct array_t* str_array);
+extern struct node_t* d_include(struct node_t* node, bool* valid, struct array_t* mac_array, struct array_t* str_array);

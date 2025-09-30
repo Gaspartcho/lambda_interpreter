@@ -3,6 +3,7 @@
 #include <string.h>
 
 
+#include "../utils/utils.h"
 #include "runtime.h"
 
 
@@ -66,27 +67,29 @@ size_t get_node_str(char** buffer, struct node_t* node) {
 			break;
 		}
 
-		case Macro: {
+		case Macro:
 			length	= strlen(node->token->name) + 1;
 			*buffer = malloc(sizeof(**buffer) * length);
 			sprintf(*buffer, "%s", node->token->name);
 			break;
-		}
+
 
 		case Directive: {
-			length	= 3;
+			char* next_str = "";
+
+			length	= get_node_str(&next_str, node->next) + 2;
 			*buffer = malloc(sizeof(**buffer) * length);
-			switch (node->dire_type) {
-				case d_Macro:	   sprintf(*buffer, "%c", MACRO); break;
-				case d_Display:	   sprintf(*buffer, "%c", DISPLAY); break;
-				case d_Tree:	   sprintf(*buffer, "%c", TREE); break;
-				case d_Display_E:  sprintf(*buffer, "%c%c", DISPLAY, EVAL); break;
-				case d_Display_EO: sprintf(*buffer, "%c%c", DISPLAY, EVAL_ONCE); break;
-				case d_Tree_E:	   sprintf(*buffer, "%c%c", TREE, EVAL); break;
-				case d_Tree_EO:	   sprintf(*buffer, "%c%c", TREE, EVAL_ONCE); break;
-			}
+
+			sprintf(*buffer, "%c%s", get_dire_symbol(node->dire), next_str);
+			if (length != 2) free(next_str);
 			break;
 		}
+
+		case String:
+			length	= strlen(node->str) + 3;
+			*buffer = malloc(sizeof(**buffer) * length);
+			sprintf(*buffer, "%c%s%c", STRING_OPEN, node->str, STRING_CLOSE);
+			break;
 	}
 
 	return length;

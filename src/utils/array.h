@@ -7,6 +7,9 @@
 #define DEFAULT_ARRAY_LENGTH 6 // Insanely arbitrary value
 
 
+#define ITERATE_ARRAY(arr, index) for (int index = 0; index < arr->size; index++)
+
+
 struct array_t {
 	size_t size;
 	size_t capacity;

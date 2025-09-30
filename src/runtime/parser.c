@@ -1,4 +1,5 @@
 #include <ctype.h>
+#include <linux/limits.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -22,8 +23,7 @@ bool get_parser_next_char(struct parser_t* parser) {
 	}
 
 	if (parser->next_char == COMMENT_OPEN) {
-		for (parser->next_char = getc(parser->file); parser->next_char != COMMENT_CLOSE;
-			 parser->next_char = getc(parser->file)) {
+		for (parser->next_char = getc(parser->file); parser->next_char != COMMENT_CLOSE; parser->next_char = getc(parser->file)) {
 			if (parser->next_char == EOF) error(E_EOF);
 		}
 
@@ -35,7 +35,7 @@ bool get_parser_next_char(struct parser_t* parser) {
 }
 
 
-void parse_name(struct parser_t* parser, name_t name, bool (*pattern_func)(char)) {
+void parse_name(struct parser_t* parser, char* name, bool (*pattern_func)(char)) {
 
 	u_short i;
 	bool	same_tok = true;
@@ -54,13 +54,16 @@ bool pattern_char_name(char c) {
 	return islower(c) || c == '_';
 }
 
-
 bool pattern_macro_name(char c) {
 	return isupper(c) || c == '_';
 }
 
 bool pattern_directive_name(char c) {
-	return c == DISPLAY || c == TREE || c == EVAL || c == EVAL_ONCE || c == MACRO;
+	return c == INCLUDE || c == EXPAND || c == FACTORIZE || c == MACRO || c == DISPLAY || c == TREE || c == EVAL || c == EVAL_ONCE || c == EVAL_EACH;
+}
+
+bool pattern_string(char c) {
+	return c != STRING_CLOSE;
 }
 
 
@@ -77,7 +80,7 @@ struct node_t* parse_var(struct parser_t* parser, struct array_t* var_array) {
 }
 
 
-struct node_t* parse_function(struct parser_t* parser, struct array_t* var_array, struct array_t* mac_array) {
+struct node_t* parse_function(struct parser_t* parser, struct array_t* var_array, struct array_t* mac_array, struct array_t* str_array) {
 
 	size_t		   init_array_size = var_array->size;
 	struct node_t* r_func		   = create_function(NULL, NULL);
@@ -106,7 +109,7 @@ struct node_t* parse_function(struct parser_t* parser, struct array_t* var_array
 
 	b_func = b_func->parent;
 	free_node(b_func->body);
-	b_func->body = parse_next_node(parser, var_array, mac_array);
+	b_func->body = parse_next_node(parser, var_array, mac_array, str_array);
 
 	while (var_array->size > init_array_size)
 		free(pop_array_elem(var_array));
@@ -115,16 +118,16 @@ struct node_t* parse_function(struct parser_t* parser, struct array_t* var_array
 }
 
 
-struct node_t* parse_application(struct parser_t* parser, struct array_t* var_array, struct array_t* mac_array) {
+struct node_t* parse_application(struct parser_t* parser, struct array_t* var_array, struct array_t* mac_array, struct array_t* str_array) {
 
 	if (parser->next_char != APPLY_OPEN) error_c(E_INV_TOK, parser->next_char);
 
 	get_parser_next_char(parser);
-	struct node_t* n_apply = create_application(NULL, parse_next_node(parser, var_array, mac_array), NULL);
+	struct node_t* n_apply = create_application(NULL, parse_next_node(parser, var_array, mac_array, str_array), NULL);
 
 	while (parser->next_char != APPLY_CLOSE) {
 		if (parser->next_char == COMMA) get_parser_next_char(parser);
-		n_apply->arg = parse_next_node(parser, var_array, mac_array);
+		n_apply->arg = parse_next_node(parser, var_array, mac_array, str_array);
 		n_apply		 = create_application(NULL, n_apply, NULL);
 	}
 
@@ -146,7 +149,7 @@ struct node_t* parse_macro(struct parser_t* parser, struct array_t* mac_array) {
 	struct token_t* token = get_token_by_name(mac_array, name);
 
 	if (token == NULL) {
-		token = malloc(sizeof(*token));
+		token	   = malloc(sizeof(*token));
 		token->ref = NULL;
 		strcpy(token->name, name);
 		add_array_elem(mac_array, token);
@@ -160,51 +163,66 @@ struct node_t* parse_directive(struct parser_t* parser) {
 
 	name_t syms;
 	parse_name(parser, syms, pattern_directive_name);
+	const u_short nb_syms = strlen(syms);
 
-	if (!(strlen(syms) == 1 || strlen(syms) == 2)) error_s(E_INV_TOK_NAME, syms);
+	if (nb_syms == 0) error_s(E_INV_TOK_NAME, syms);
 
-	switch (syms[0]) {
-		default:
-			error_c(E_INV_TOK, syms[0]);
-			return NULL;
-			break;
+	struct node_t* n_dire = create_directive(NULL, NULL, d_identity);
+	struct node_t* s_dire = n_dire;
 
-		case MACRO: return create_directive(NULL, macro, d_Macro); break;
+	for (u_short i = 0; i < nb_syms; i++) {
+		switch (syms[i]) {
+			case EMPTY:		s_dire->dire = d_identity; break;
+			case INCLUDE:	s_dire->dire = d_include; break;
+			case MACRO:		s_dire->dire = d_macro; break;
+			case FACTORIZE: s_dire->dire = d_factorize; break;
+			case EXPAND:	s_dire->dire = d_expand; break;
+			case DISPLAY:	s_dire->dire = d_display; break;
+			case TREE:		s_dire->dire = d_tree; break;
+			case EVAL:		s_dire->dire = d_evaluate; break;
+			case EVAL_ONCE: s_dire->dire = d_eval_once; break;
+			case EVAL_EACH: s_dire->dire = d_eval_each; break;
 
-		case DISPLAY:
-			switch (syms[1]) {
-				default:
-					error_c(E_INV_TOK, syms[1]);
-					return NULL;
-					break;
-				case EMPTY:		return create_directive(NULL, display, d_Display); break;
-				case EVAL:		return create_directive(NULL, display_eval, d_Display_E); break;
-				case EVAL_ONCE: return create_directive(NULL, display_eval_once, d_Display_EO); break;
-			}
-			break;
+			default:
+				error_c(E_INV_TOK, syms[i]);
+				return NULL;
+				break;
+		}
 
-		case TREE:
-			switch (syms[1]) {
-				default:
-					error_c(E_INV_TOK, syms[1]);
-					return NULL;
-					break;
-				case EMPTY:		return create_directive(NULL, tree, d_Tree); break;
-				case EVAL:		return create_directive(NULL, tree_eval, d_Tree_E); break;
-				case EVAL_ONCE: return create_directive(NULL, tree_eval_once, d_Tree_EO); break;
-			}
-			break;
+		s_dire->next = create_directive(s_dire, NULL, d_identity);
+		s_dire		 = s_dire->next;
 	}
+
+	s_dire->parent->next = NULL;
+	free_node(s_dire);
+
+	return n_dire;
 }
 
 
-struct node_t* parse_next_node(struct parser_t* parser, struct array_t* var_array, struct array_t* mac_array) {
+struct node_t* parse_string(struct parser_t* parser, struct array_t* str_array) {
 
+	get_parser_next_char(parser);
+
+	// Might change later to allow for longer strings
+	char* data = malloc(sizeof(*data) * (NAME_MAX + 1));
+	parse_name(parser, data, pattern_string);
+	add_array_elem(str_array, data);
+
+	get_parser_next_char(parser);
+
+	return create_string(NULL, data);
+}
+
+
+struct node_t* parse_next_node(struct parser_t* parser, struct array_t* var_array, struct array_t* mac_array, struct array_t* str_array) {
+
+	if (parser->next_char == FUNC_DEF) return parse_function(parser, var_array, mac_array, str_array);
+	if (parser->next_char == APPLY_OPEN) return parse_application(parser, var_array, mac_array, str_array);
 	if (pattern_char_name(parser->next_char)) return parse_var(parser, var_array);
-	if (parser->next_char == FUNC_DEF) return parse_function(parser, var_array, mac_array);
-	if (parser->next_char == APPLY_OPEN) return parse_application(parser, var_array, mac_array);
 	if (pattern_macro_name(parser->next_char)) return parse_macro(parser, mac_array);
 	if (pattern_directive_name(parser->next_char)) return parse_directive(parser);
+	if (parser->next_char == STRING_OPEN) return parse_string(parser, str_array);
 
 	error_c(E_INV_TOK, parser->next_char);
 

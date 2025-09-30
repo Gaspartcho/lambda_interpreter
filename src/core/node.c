@@ -15,6 +15,7 @@ struct node_t* create_variable(struct node_t* parent, struct node_t* ref) {
 	return n_var;
 }
 
+
 struct node_t* create_function(struct node_t* parent, struct node_t* body) {
 
 	struct node_t* n_func = malloc(sizeof(*n_func));
@@ -26,6 +27,7 @@ struct node_t* create_function(struct node_t* parent, struct node_t* body) {
 
 	return n_func;
 }
+
 
 struct node_t* create_application(struct node_t* parent, struct node_t* func, struct node_t* arg) {
 
@@ -39,6 +41,7 @@ struct node_t* create_application(struct node_t* parent, struct node_t* func, st
 	return n_apply;
 }
 
+
 struct node_t* create_macro(struct node_t* parent, struct token_t* token) {
 
 	struct node_t* n_macro = malloc(sizeof(*n_macro));
@@ -50,16 +53,29 @@ struct node_t* create_macro(struct node_t* parent, struct token_t* token) {
 	return n_macro;
 }
 
-struct node_t* create_directive(struct node_t* parent, directive_t dire, enum dire_type_t dire_type) {
+
+struct node_t* create_directive(struct node_t* parent, struct node_t* next, directive_t dire) {
 
 	struct node_t* n_dire = malloc(sizeof(*n_dire));
 
-	n_dire->type	  = Directive;
-	n_dire->parent	  = parent;
-	n_dire->dire	  = dire;
-	n_dire->dire_type = dire_type;
+	n_dire->type   = Directive;
+	n_dire->parent = parent;
+	n_dire->next   = next;
+	n_dire->dire   = dire;
 
 	return n_dire;
+}
+
+
+struct node_t* create_string(struct node_t* parent, char* data) {
+
+	struct node_t* n_str = malloc(sizeof(*n_str));
+
+	n_str->type	  = String;
+	n_str->parent = parent;
+	n_str->str	  = data;
+
+	return n_str;
 }
 
 
@@ -84,7 +100,8 @@ struct node_t* copy_node(struct node_t* node) {
 		case Variable:	  return create_variable(NULL, node->ref); break;
 		case Application: return create_application(NULL, copy_node(node->func), copy_node(node->arg)); break;
 		case Macro:		  return create_macro(NULL, node->token); break;
-		case Directive:	  return create_directive(NULL, node->dire, node->dire_type); break;
+		case Directive:	  return create_directive(NULL, copy_node(node->next), node->dire); break;
+		case String:	  return create_string(NULL, node->str);
 
 		case Function: {
 
@@ -106,8 +123,9 @@ void free_node(struct node_t* node) {
 	}
 
 	switch (node->type) {
-		default:	   break;
-		case Function: free_node(node->body); break;
+		default:		break;
+		case Function:	free_node(node->body); break;
+		case Directive: free_node(node->next); break;
 		case Application:
 			free_node(node->func);
 			free_node(node->arg);
