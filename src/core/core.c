@@ -138,7 +138,7 @@ struct node_t* apply_directive(struct node_t* node, struct node_t* directive_nod
 
 bool is_node_self_contained(struct node_t* node, struct array_t* var_array) {
 
-	if (node == NULL) return true;
+	if (node == NULL) return false;
 
 	switch (node->type) {
 		default:		  return true; break;

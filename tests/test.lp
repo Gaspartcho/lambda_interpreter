@@ -1,5 +1,7 @@
-(* "/home/gaspard/Documents/Programation/lprog/lambda_interpreter/tests/test2.lp")
+(* "test2.lp")
 
-($& (THREE "abo" % dwdd %  , "caf"))
+%($& (THREE "abo"  dwdd   , "caf"))%
 
-(+& (SUCC (SUCC (SUCC ONE))))
+(@ TEST \x, y. ((x, y) ((x, y), y)))
+
+(#?# (SUCC (SUCC THREE)))

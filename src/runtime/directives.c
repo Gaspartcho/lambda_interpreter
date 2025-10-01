@@ -70,7 +70,16 @@ struct node_t* d_tree(struct node_t* node, bool* valid, struct array_t* mac_arra
 
 	if (valid == NULL) return (struct node_t*)TREE;
 
-	error_s(E_DIRE_NIMPL, "TREE (#)");
+	struct array_t* var_array = init_array(DEFAULT_ARRAY_LENGTH, free);
+	if (!is_node_self_contained(node, var_array)) error_s(E_INV_TYPE, "Supposed to be self-contained");
+	free_array(var_array);
+
+	update_node_depth(node);
+
+	char* tree;
+	generate_tree(&tree, node);
+	printf("%s\n", tree);
+	free(tree);
 
 	*valid = false;
 	return node;

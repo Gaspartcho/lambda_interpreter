@@ -37,7 +37,7 @@ void get_file_path_from_relative_path(char** buffer, char* path, char* relative_
 
 	*pos = '\0';
 
-	*buffer = malloc(sizeof(**buffer) * (strlen(path) + strlen(relative_path) + 1));
+	*buffer = malloc(sizeof(**buffer) * (strlen(path) + strlen(relative_path) + 2));
 
 	if (relative_path[0] == '/') strcpy(*buffer, relative_path);
 	else sprintf(*buffer, "%s%c%s", path, FILE_SEPARATOR, relative_path);
