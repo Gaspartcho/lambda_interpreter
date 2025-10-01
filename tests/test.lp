@@ -2,6 +2,7 @@
 
 %($& (THREE "abo"  dwdd   , "caf"))%
 
-(@ TEST \x, y. ((x, y) ((x, y), y)))
 
-(#?# (SUCC (SUCC THREE)))
+(@#?# TEST (SUCC (SUCC THREE)))
+
+(+#& TEST)
