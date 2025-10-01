@@ -1,12 +1,7 @@
-#include <limits.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 
-#include "../error/error.h"
 #include "../utils/utils.h"
 #include "runtime.h"
 
@@ -20,8 +15,7 @@
 #define APPL_E_FLAG N_BIT(12)
 #define HBAR_FLAG	N_BIT(13)
 #define VBAR_FLAG	N_BIT(14)
-
-#define VAL_MASK (N_BIT(8) - 1)
+#define VAL_MASK	(N_BIT(8) - 1)
 
 
 struct tree_image_t {

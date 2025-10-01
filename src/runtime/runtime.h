@@ -47,7 +47,7 @@ extern struct node_t* parse_next_node(struct parser_t* parser, struct array_t* v
 
 void		  run_file(char filename[], struct array_t* mac_array, struct array_t* str_array);
 extern size_t get_node_str(char** buffer, struct node_t* node);
-extern void generate_tree(char** buffer, struct node_t* node);
+extern void	  generate_tree(char** buffer, struct node_t* node);
 
 extern struct node_t* d_identity(struct node_t* node, bool* valid, struct array_t* mac_array, struct array_t* str_array);
 extern struct node_t* d_macro(struct node_t* node, bool* valid, struct array_t* mac_array, struct array_t* str_array);

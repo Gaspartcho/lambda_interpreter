@@ -1,5 +1,3 @@
-#include <bits/types/stack_t.h>
-#include <stdbool.h>
 #include <stdlib.h>
 
 

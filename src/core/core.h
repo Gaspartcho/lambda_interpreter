@@ -8,8 +8,6 @@
 #include "../utils/array.h"
 
 
-#define MAX_DEPTH UCHAR_MAX
-
 typedef unsigned char  u_char;
 typedef unsigned short u_short;
 typedef unsigned char  depth_t;
