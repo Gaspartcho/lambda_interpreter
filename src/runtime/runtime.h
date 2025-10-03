@@ -35,9 +35,6 @@
 #define NB_LETTERS 26
 
 
-typedef char name_t[NAME_MAX + 1];
-
-
 struct parser_t {
 	FILE* file;
 	char  next_char;

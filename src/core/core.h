@@ -1,11 +1,13 @@
 #pragma once
 
 
-#include <limits.h>
 #include <stdbool.h>
 
 
 #include "../utils/array.h"
+
+
+#define NAME_MAX 255
 
 
 typedef unsigned char  u_char;

@@ -17,12 +17,14 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror -g")
 
 
-file(GLOB_RECURSE SRCS ${SOURCE_DIR}/*.c ${SOURCE_DIR}/*.h )
+file(GLOB_RECURSE SRCS ${SOURCE_DIR}/*.c)
 
 add_executable(${PROJECT_NAME} ${SRCS})
 
 
 add_custom_target(proof
- COMMAND ivette ${SOURCE_DIR}*.c -wp-rte -wp-smoke-tests -wp-counter-examples -wp-prover "Z3,cvc5,Alt-Ergo"
+ COMMAND ivette -wp-rte -wp-smoke-tests -wp-counter-examples
+    -wp-prover "Z3,cvc5,Alt-Ergo"
+    ${SRCS}
  COMMENT "Lauching Ivette"
 )
