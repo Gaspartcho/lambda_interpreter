@@ -6,7 +6,7 @@
 #include "runtime.h"
 
 
-size_t get_var_name(name_t name, depth_t var) {
+void get_var_name(name_t name, depth_t var) {
 
 	size_t i = 0;
 
@@ -16,80 +16,91 @@ size_t get_var_name(name_t name, depth_t var) {
 		i++;
 	} while (var >= NB_LETTERS);
 
-	name[i] = '\0';
-
-	return i;
+	name[i] = BLANK;
 }
 
 
-size_t get_node_str(char** buffer, struct node_t* node) {
-
-	if (node == NULL) {
-		return 0;
+size_t get_var_size(depth_t var) {
+	size_t size = 1;
+	while (var >= NB_LETTERS) {
+		var /= NB_LETTERS;
+		size++;
 	}
+	return size;
+}
 
-	size_t length;
+
+size_t get_node_size(struct node_t* node) {
+
+	if (node == NULL) return 0;
 
 	switch (node->type) {
-		case Variable: {
-			name_t var_name;
+		case Variable:	  return get_var_size(node->ref->depth);
+		case Function:	  return get_node_size(node->body) + get_var_size(node->depth) + 3;
+		case Application: return get_node_size(node->func) + get_node_size(node->arg) + 4;
+		case Macro:		  return strlen(node->token->name);
+		case Directive:	  return get_node_size(node->next) + 1;
+		case String:	  return strlen(node->str) + 2;
+	}
 
-			length	= get_var_name(var_name, node->ref->depth) + 1;
-			*buffer = malloc(sizeof(**buffer) * length);
+	return 0;
+}
 
-			sprintf(*buffer, "%s", var_name);
-			break;
-		}
 
+void write_node(char* buffer, struct node_t* node) {
+
+	if (node == NULL) return;
+
+	switch (node->type) {
+		case Variable: get_var_name(buffer, node->ref->depth); break;
 		case Function: {
-			name_t var_name;
-			char*  body_str;
+			size_t name_size = get_var_size(node->depth);
 
-			length	= get_var_name(var_name, node->depth) + get_node_str(&body_str, node->body) + 3;
-			*buffer = malloc(sizeof(**buffer) * length);
+			buffer[0] = FUNC_DEF;
+			get_var_name(buffer + 1, node->depth);
+			buffer[name_size + 1] = DOT;
+			buffer[name_size + 2] = SPACE;
+			write_node(buffer + name_size + 3, node->body);
 
-			sprintf(*buffer, "%c%s%c%c%s", FUNC_DEF, var_name, DOT, SPACE, body_str);
-			free(body_str);
 			break;
 		}
 
 		case Application: {
-			char* func_str;
-			char* arg_str;
+			size_t func_size = get_node_size(node->func);
+			size_t arg_size	 = get_node_size(node->arg);
 
-			length	= get_node_str(&func_str, node->func) + get_node_str(&arg_str, node->arg) + 4;
-			*buffer = malloc(sizeof(**buffer) * length);
+			buffer[0] = APPLY_OPEN;
+			write_node(buffer + 1, node->func);
+			buffer[func_size + 1] = COMMA;
+			buffer[func_size + 2] = SPACE;
+			write_node(buffer + func_size + 3, node->arg);
+			buffer[func_size + arg_size + 3] = APPLY_CLOSE;
 
-			sprintf(*buffer, "%c%s%c%c%s%c", APPLY_OPEN, func_str, COMMA, SPACE, arg_str, APPLY_CLOSE);
-			free(func_str);
-			free(arg_str);
 			break;
 		}
 
-		case Macro:
-			length	= strlen(node->token->name) + 1;
-			*buffer = malloc(sizeof(**buffer) * length);
-			sprintf(*buffer, "%s", node->token->name);
-			break;
-
+		case Macro: strcpy(buffer, node->token->name); break;
 
 		case Directive: {
-			char* next_str = "";
-
-			length	= get_node_str(&next_str, node->next) + 2;
-			*buffer = malloc(sizeof(**buffer) * length);
-
-			sprintf(*buffer, "%c%s", get_dire_symbol(node->dire), next_str);
-			if (length != 2) free(next_str);
+			buffer[0] = get_dire_symbol(node->dire);
+			write_node(buffer + 1, node->next);
 			break;
 		}
 
 		case String:
-			length	= strlen(node->str) + 3;
-			*buffer = malloc(sizeof(**buffer) * length);
-			sprintf(*buffer, "%c%s%c", STRING_OPEN, node->str, STRING_CLOSE);
-			break;
+			buffer[0] = STRING_OPEN;
+			strcpy(buffer + 1, node->str);
+			buffer[strlen(node->str) + 1] = STRING_CLOSE;
 	}
+}
 
-	return length;
+
+char* get_node_str(struct node_t* node) {
+
+	size_t size	  = get_node_size(node);
+	char*  buffer = malloc(sizeof(*buffer) * (size + 1));
+	buffer[0]	  = BLANK;
+	write_node(buffer, node);
+	buffer[size] = BLANK;
+	return buffer;
 }

@@ -61,17 +61,16 @@ extern struct node_t* create_macro(struct node_t* parent, struct token_t* token)
 extern struct node_t* create_directive(struct node_t* parent, struct node_t* next, directive_t dire);
 extern struct node_t* create_string(struct node_t* parent, char* data);
 
-extern struct node_t* reset_node(struct node_t* node);
 extern struct node_t* copy_node(struct node_t* node);
 extern void			  free_node(struct node_t* node);
 
-extern void update_node_ref(struct node_t* node, struct node_t* old_ref, struct node_t* new_ref);
-extern void update_node_parent(struct node_t* node, struct node_t* parent);
-extern void update_node_depth(struct node_t* node);
+extern struct node_t* update_node_ref(struct node_t* node, struct node_t* old_ref, struct node_t* new_ref);
+extern struct node_t* update_node_parent(struct node_t* node, struct node_t* parent);
+extern struct node_t* update_node_depth(struct node_t* node);
 
-extern bool			  beta_reduce(struct node_t** node, struct array_t* mac_array, struct array_t* str_array);
-extern bool			  mu_factorize(struct node_t** node, struct array_t* mac_array);
-extern bool			  mu_expand(struct node_t** node, struct array_t* mac_array);
+extern struct node_t* beta_reduce(struct node_t* node, bool* changed, struct array_t* mac_array, struct array_t* str_array);
+extern struct node_t* mu_factorize(struct node_t* node, bool* changed, struct array_t* mac_array);
+extern struct node_t* mu_expand(struct node_t* node, bool* changed, struct array_t* mac_array);
 extern bool			  is_node_self_contained(struct node_t* node, struct array_t* var_array);
 extern bool			  is_beta_normal(struct node_t* node);
 extern struct node_t* apply_directive(struct node_t* node, struct node_t* directive_node, struct array_t* mac_array, struct array_t* str_array);

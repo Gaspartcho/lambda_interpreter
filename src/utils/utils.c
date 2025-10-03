@@ -30,17 +30,19 @@ char get_dire_symbol(directive_t dire) {
 }
 
 
-void get_file_path_from_relative_path(char** buffer, char* path, char* relative_path) {
+char* get_file_path_from_relative_path(char* path, char* relative_path) {
 
 	char* pos = strrchr(path, FILE_SEPARATOR);
 	if (pos == NULL) error_s(E, path);
 
 	*pos = '\0';
 
-	*buffer = malloc(sizeof(**buffer) * (strlen(path) + strlen(relative_path) + 2));
+	char* buffer = malloc(sizeof(*buffer) * (strlen(path) + strlen(relative_path) + 2));
 
-	if (relative_path[0] == '/') strcpy(*buffer, relative_path);
-	else sprintf(*buffer, "%s%c%s", path, FILE_SEPARATOR, relative_path);
+	if (relative_path[0] == '/') strcpy(buffer, relative_path);
+	else sprintf(buffer, "%s%c%s", path, FILE_SEPARATOR, relative_path);
 
 	*pos = FILE_SEPARATOR;
+
+	return buffer;
 }

@@ -3,6 +3,4 @@
 %($& (THREE "abo"  dwdd   , "caf"))%
 
 
-(@#?# TEST (SUCC (SUCC THREE)))
-
-(+#& TEST)
+(&?&# (SUCC (SUCC THREE)))

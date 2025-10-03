@@ -79,17 +79,6 @@ struct node_t* create_string(struct node_t* parent, char* data) {
 }
 
 
-struct node_t* reset_node(struct node_t* node) {
-
-	struct node_t* n_node = copy_node(node);
-
-	update_node_parent(n_node, node->parent);
-	free_node(node);
-
-	return n_node;
-}
-
-
 struct node_t* copy_node(struct node_t* node) {
 
 	if (node == NULL) {
@@ -104,11 +93,8 @@ struct node_t* copy_node(struct node_t* node) {
 		case String:	  return create_string(NULL, node->str);
 
 		case Function: {
-
 			struct node_t* n_node = create_function(NULL, copy_node(node->body));
-			update_node_ref(n_node->body, node, n_node);
-			return n_node;
-
+			return update_node_ref(n_node, node, n_node);
 			break;
 		}
 	}

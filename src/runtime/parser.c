@@ -41,18 +41,18 @@ void parse_name(struct parser_t* parser, char* name, bool (*pattern_func)(char))
 		name[i]	 = parser->next_char;
 		same_tok = !get_parser_next_char(parser);
 	}
-	name[i] = EMPTY;
+	name[i] = BLANK;
 
 	return;
 }
 
 
 bool pattern_char_name(char c) {
-	return islower(c) || c == '_';
+	return islower(c) || c == UNDERSCORE;
 }
 
 bool pattern_macro_name(char c) {
-	return isupper(c) || c == '_';
+	return isupper(c) || c == UNDERSCORE;
 }
 
 bool pattern_directive_name(char c) {
@@ -169,7 +169,7 @@ struct node_t* parse_directive(struct parser_t* parser) {
 
 	for (u_short i = 0; i < nb_syms; i++) {
 		switch (syms[i]) {
-			case EMPTY:		s_dire->dire = d_identity; break;
+			case BLANK:		s_dire->dire = d_identity; break;
 			case INCLUDE:	s_dire->dire = d_include; break;
 			case MACRO:		s_dire->dire = d_macro; break;
 			case FACTORIZE: s_dire->dire = d_factorize; break;

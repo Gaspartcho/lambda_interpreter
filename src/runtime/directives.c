@@ -1,3 +1,5 @@
+#include <stdbool.h>
+#include <stddef.h>
 #include <stdlib.h>
 
 
@@ -8,7 +10,7 @@
 
 
 struct node_t* d_identity(struct node_t* node, bool* valid, struct array_t* mac_array, struct array_t* str_array) {
-	if (valid == NULL) return (struct node_t*)EMPTY;
+	if (valid == NULL) return (struct node_t*)BLANK;
 
 	*valid = false;
 	return node;
@@ -19,32 +21,30 @@ struct node_t* d_macro(struct node_t* node, bool* valid, struct array_t* mac_arr
 
 	if (valid == NULL) return (struct node_t*)MACRO;
 
-	if (node->type != Macro) error_s(E_INV_TYPE, "Supposed to be Macro");
-	if (node->parent->parent == NULL) error_s(E_INV_TYPE, "Function takes 2 arguments, gave 1");
-	if (node->parent->parent->type != Application) error_s(E_INV_TYPE, "Supposed to be Application");
+	if (node->type != Macro) error_s(E_INV_TYPE_M, get_node_str(node));
+	if (node->parent->parent == NULL) error_s(E_NB_ARG, get_node_str(node->parent));
+	if (node->parent->parent->type != Application) error_s(E_INV_TYPE_A, get_node_str(node->parent->parent));
 	if (node->token->ref != NULL) error_s(E_DEF_MAC, node->token->name);
 
 	struct node_t*	n_ref	  = node->parent->parent->arg;
 	struct array_t* var_array = init_array(DEFAULT_ARRAY_LENGTH, free);
-
-	if (!is_node_self_contained(n_ref, var_array)) error_s(E_INV_TYPE, "Supposed to be self-contained");
+	if (!is_node_self_contained(n_ref, var_array)) error_s(E_SELFC, node->token->name);
 	free_array(var_array);
 
-	// God please forgive me for what is going to happen here...
 
-	struct node_t* next_dire = node->parent->func;
+	struct node_t* dire_node = node->parent->func;
 
-	while (get_dire_symbol(next_dire->dire) != MACRO)
-		next_dire = next_dire->next;
+	while (get_dire_symbol(dire_node->dire) != MACRO)
+		dire_node = dire_node->next;
 
-	node->token->ref = apply_directive(copy_node(n_ref), next_dire->next, mac_array, str_array);
-	update_node_parent(node->token->ref, NULL);
-	update_node_depth(node->token->ref);
+	n_ref					  = apply_directive(n_ref, dire_node->next, mac_array, str_array);
+	node->parent->parent->arg = n_ref;
+	node->token->ref		  = update_node_depth(update_node_parent(copy_node(n_ref), NULL));
 
 	free_node(node);
 
 	*valid = false;
-	return create_directive(NULL, copy_node(next_dire->next), d_identity);
+	return create_directive(NULL, NULL, d_identity);
 }
 
 
@@ -54,8 +54,7 @@ struct node_t* d_display(struct node_t* node, bool* valid, struct array_t* mac_a
 
 	update_node_depth(node);
 
-	char* name;
-	get_node_str(&name, node);
+	char* name = get_node_str(node);
 	printf("%s\n", name);
 	free(name);
 
@@ -72,10 +71,7 @@ struct node_t* d_tree(struct node_t* node, bool* valid, struct array_t* mac_arra
 	if (!is_node_self_contained(node, var_array)) error_s(E_INV_TYPE, "Supposed to be self-contained");
 	free_array(var_array);
 
-	update_node_depth(node);
-
-	char* tree;
-	generate_tree(&tree, node);
+	char* tree = generate_tree(update_node_depth(node));
 	printf("%s\n", tree);
 	free(tree);
 
@@ -90,10 +86,11 @@ struct node_t* d_evaluate(struct node_t* node, bool* valid, struct array_t* mac_
 
 	struct node_t* parent = node->parent;
 
-	while (beta_reduce(&node, mac_array, str_array))
-		update_node_parent(node, parent);
+	for (bool changed = true; changed;) {
+		changed = false;
+		node	= update_node_parent(beta_reduce(node, &changed, mac_array, str_array), parent);
+	}
 
-	update_node_parent(node, parent);
 
 	*valid = false;
 	return node;
@@ -103,9 +100,9 @@ struct node_t* d_eval_once(struct node_t* node, bool* valid, struct array_t* mac
 
 	if (valid == NULL) return (struct node_t*)EVAL_ONCE;
 
-	struct node_t* parent = node->parent;
-	beta_reduce(&node, mac_array, str_array);
-	update_node_parent(node, parent);
+	struct node_t* parent  = node->parent;
+	bool		   changed = false;
+	node				   = update_node_parent(beta_reduce(node, &changed, mac_array, str_array), parent);
 
 	*valid = false;
 	return node;
@@ -113,12 +110,12 @@ struct node_t* d_eval_once(struct node_t* node, bool* valid, struct array_t* mac
 
 
 struct node_t* d_eval_each(struct node_t* node, bool* valid, struct array_t* mac_array, struct array_t* str_array) {
-	if (valid == NULL) return (struct node_t*)EVAL_ONCE;
+	if (valid == NULL) return (struct node_t*)EVAL_EACH;
 
-	struct node_t* parent = node->parent;
-	beta_reduce(&node, mac_array, str_array);
-	*valid = !is_beta_normal(node);
-	update_node_parent(node, parent);
+	struct node_t* parent  = node->parent;
+	bool		   changed = false;
+	node				   = update_node_parent(beta_reduce(node, &changed, mac_array, str_array), parent);
+	*valid				   = !is_beta_normal(node);
 
 	return node;
 }
@@ -130,10 +127,11 @@ struct node_t* d_factorize(struct node_t* node, bool* valid, struct array_t* mac
 
 	struct node_t* parent = node->parent;
 
-	while (mu_factorize(&node, mac_array))
-		update_node_parent(node, parent);
+	for (bool changed = true; changed;) {
+		changed = false;
+		node	= update_node_parent(mu_factorize(node, &changed, mac_array), parent);
+	}
 
-	update_node_parent(node, parent);
 
 	*valid = false;
 	return node;
@@ -146,10 +144,10 @@ struct node_t* d_expand(struct node_t* node, bool* valid, struct array_t* mac_ar
 
 	struct node_t* parent = node->parent;
 
-	while (mu_expand(&node, mac_array))
-		update_node_parent(node, parent);
-
-	update_node_parent(node, parent);
+	for (bool changed = true; changed;) {
+		changed = false;
+		node	= update_node_parent(mu_expand(node, &changed, mac_array), parent);
+	}
 
 	*valid = false;
 	return node;
@@ -160,11 +158,10 @@ struct node_t* d_include(struct node_t* node, bool* valid, struct array_t* mac_a
 
 	if (valid == NULL) return (struct node_t*)INCLUDE;
 
-	if (node->type != String) error_s(E_INV_TYPE, "Supposed to be string");
+	if (node->type != String) error_s(E_INV_TYPE_S, get_node_str(node));
 
-	char* filename;
-	get_file_path_from_relative_path(&filename, get_array_elem(str_array, 0), node->str);
 
+	char* filename = get_file_path_from_relative_path(ARRAY_ELEM(str_array, 0), node->str);
 	run_file(filename, mac_array, str_array);
 	free(filename);
 

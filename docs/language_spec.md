@@ -1,35 +1,117 @@
 # Specification for the Lambda prog (\lprog) language
 
-!!! INSANELY OUTDATED !!!
+This is the official \lprog language specification document
 
-## Elements
+## Language Elements:
 
-### In-language elements
 
-As inspired by the lambda calculus theory, the `\lprog` language is made to be extremely simple. Henceforth in the language itself there is only 3 components:
+### Variables
 
-- **Variables**: Denoted by any string of _lowercase_ ASCII letters (`a-z`).
-- **Functions**: Denoted by `\x, y, [...] . (...)`.
-- **Applications**: Denoted by `((...), (...), [...])`
+Syntax:
+
+```lp
+variable
+```
+
+### Functions
+
+Syntax:
+
+```lp
+\ variable. ANY
+```
+
+
+
+```lp
+\a. \b. \c. ANY
+\ a, b, c. ANY
+```
+
+### Applications
+
+Syntax:
+
+```lp
+(ANY, ANY)
+```
+
+```lp
+((F, G) H)
+(F, G, H)
+```
+
+```lp
+(ANY)
+ANY
+```
 
 ### Macros
 
-- `&`: Display: Returns previous
-- `#`: Tree: Returns previous
-- `$`: Eval: Returns previous evaluated
-- `% NAME [(...) (...), [...]]`: Macro Def.: Returns Nothing
-- `@ NAME (...)`: Code Macro Def.: Returns Nothing
+Syntax:
 
-- `*`: File Include: Returns Nothing;
+```lp
+MACRO
+```
+
+### Strings
+
+Syntax:
+
+```lp
+"string"
+```
+
+### Directives
+
+#### Display
+
+Syntax:
+
+```lp
+(& ANY)
+```
+
+```
+
+```
+
+#### Tree
+
+Syntax:
+
+```lp
+(# ANY)
+```
+
+Tree representation for the number 6.
+```
+━┯━┯━┯━┯━┯━━━
+━┿━┿━┿━┿━┿━┯━
+ │ │ │ │ │─┘
+ │ │ │ ├─┘
+ │ │ ├─┘
+ │ ├─┘
+ ├─┘
+```
+
+#### Macro Definition
+
+Syntax:
+
+```lp
+(@ MACRO ANY)
+((@ MACRO) ANY)
+```
 
 
-### Others
 
-- `"(...)"`: String (right now only used in the file include part)
-- `//`: Line Comment
-- `/* (...) */` Block Comment
+#### Include
 
+Syntax:
 
-## Syntax
+```lp
+(* "path_to_file")
+```
 
-Be aware that spaces (or new lines / tabs) are supposed to be _NEVER_ taken into account by the parser (except for line comments).
+## Behaviors

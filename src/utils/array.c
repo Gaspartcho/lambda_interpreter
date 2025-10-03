@@ -44,16 +44,6 @@ void add_array_elem(struct array_t* array, void* elem) {
 	return;
 }
 
-void set_array_elem(struct array_t* array, void* elem, size_t index) {
-
-	array->content[index] = elem;
-	return;
-}
-
-void* get_array_elem(struct array_t* array, size_t index) {
-	return array->content[index];
-}
-
 void* pop_array_elem(struct array_t* array) {
 
 	if (array->size == 0) {

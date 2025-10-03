@@ -17,6 +17,15 @@
 #define VBAR_FLAG	N_BIT(14)
 #define VAL_MASK	(N_BIT(8) - 1)
 
+#define TREE_FUNC_T		"┯"
+#define TREE_FUNC_CROSS "┿"
+#define TREE_FUNC_HBAR	"━"
+#define TREE_VBAR		"│"
+#define TREE_HBAR		"─"
+#define TREE_CURVE		"┘"
+#define TREE_SPLIT		"├"
+#define TREE_SPACE		" "
+
 
 struct tree_image_t {
 	u_short width;
@@ -181,10 +190,7 @@ void complete_tree(struct tree_image_t* image) {
 
 			if (IMAGE_ELEM(image, i, j) & (APPL_B_FLAG | APPL_E_FLAG)) {
 				for (int k = i - 1; k >= 0; k--) {
-
-					if (IMAGE_ELEM(image, k, j) && !(IMAGE_ELEM(image, k, j) & VAR_FLAG)) {
-						break;
-					}
+					if (IMAGE_ELEM(image, k, j) && !(IMAGE_ELEM(image, k, j) & VAR_FLAG)) break;
 					IMAGE_ELEM(image, k, j) |= VBAR_FLAG;
 				}
 			}
@@ -200,68 +206,47 @@ size_t get_image_size(struct tree_image_t* image) {
 
 	for (u_short i = 0; i < image->height; i++) {
 		for (u_short j = 0; j < image->width; j++) {
-			if (IMAGE_ELEM(image, i, j) & (~VAL_MASK)) count++;
+			count += ((IMAGE_ELEM(image, i, j) & (~VAL_MASK))) ? 2 : 0;
 		}
 	}
 
-	return (image->width + 1) * image->height + 2 * count + 1;
+	return (image->width + 1) * image->height + count + 1;
 }
 
 
 void draw_tree(char* buffer, struct tree_image_t* image) {
 	for (u_short i = 0; i < image->height; i++) {
 		for (u_short j = 0; j < image->width; j++) {
-			if ((IMAGE_ELEM(image, i, j) & FUNC_E_FLAG)) {
-				buffer += sprintf(buffer, "%s", "┯");
-				continue;
-			}
-			if ((IMAGE_ELEM(image, i, j) & FUNC_FLAG) && (IMAGE_ELEM(image, i, j) & VBAR_FLAG)) {
-				buffer += sprintf(buffer, "%s", "┿");
-				continue;
-			}
-			if (IMAGE_ELEM(image, i, j) & FUNC_FLAG) {
-				buffer += sprintf(buffer, "%s", "━");
-				continue;
-			}
-			if (IMAGE_ELEM(image, i, j) & VBAR_FLAG) {
-				buffer += sprintf(buffer, "%s", "│");
-				continue;
-			}
-			if (IMAGE_ELEM(image, i, j) & APPL_B_FLAG) {
-				buffer += sprintf(buffer, "%s", "├");
-				continue;
-			}
-			if (IMAGE_ELEM(image, i, j) & APPL_E_FLAG) {
-				buffer += sprintf(buffer, "%s", "┘");
-				continue;
-			}
-			if (IMAGE_ELEM(image, i, j) & HBAR_FLAG) {
-				buffer += sprintf(buffer, "%s", "─");
-				continue;
-			}
-			if ((IMAGE_ELEM(image, i, j) & VAL_MASK) == '\0') {
-				buffer += sprintf(buffer, "%c", ' ');
-				continue;
-			}
 
-			buffer += sprintf(buffer, "%c", IMAGE_ELEM(image, i, j) & VAL_MASK);
+			char  default_character[2] = {IMAGE_ELEM(image, i, j) & VAL_MASK, BLANK};
+			char* next_character	   = default_character;
+
+			if ((IMAGE_ELEM(image, i, j) & FUNC_E_FLAG)) next_character = TREE_FUNC_T;
+			else if ((IMAGE_ELEM(image, i, j) & FUNC_FLAG) && (IMAGE_ELEM(image, i, j) & VBAR_FLAG)) next_character = TREE_FUNC_CROSS;
+			else if (IMAGE_ELEM(image, i, j) & FUNC_FLAG) next_character = TREE_FUNC_HBAR;
+			else if (IMAGE_ELEM(image, i, j) & APPL_B_FLAG) next_character = TREE_SPLIT;
+			else if (IMAGE_ELEM(image, i, j) & APPL_E_FLAG) next_character = TREE_CURVE;
+			else if (IMAGE_ELEM(image, i, j) & VBAR_FLAG) next_character = TREE_VBAR;
+			else if (IMAGE_ELEM(image, i, j) & HBAR_FLAG) next_character = TREE_HBAR;
+			else if ((IMAGE_ELEM(image, i, j) & VAL_MASK) == BLANK) next_character = TREE_SPACE;
+
+			buffer += sprintf(buffer, "%s", next_character);
 		}
-
-		buffer += sprintf(buffer, "%c", '\n');
+		buffer += sprintf(buffer, "\n");
 	}
 }
 
 
-void generate_tree(char** buffer, struct node_t* node) {
+char* generate_tree(struct node_t* node) {
 
 	struct tree_image_t image;
 	init_image(&image, 1, 1);
 	build_tree(&image, node);
 	complete_tree(&image);
 
-	*buffer = malloc(sizeof(**buffer) * get_image_size(&image));
-	draw_tree(*buffer, &image);
+	char* buffer = malloc(sizeof(*buffer) * get_image_size(&image));
+	draw_tree(buffer, &image);
 	free(image.data);
 
-	return;
+	return buffer;
 }

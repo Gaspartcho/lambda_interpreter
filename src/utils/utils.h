@@ -26,4 +26,4 @@ extern struct token_t* get_token_by_name(struct array_t* array, name_t name);
 
 extern void free_mac_token(void* token);
 
-extern void get_file_path_from_relative_path(char** buffer, char* path, char* relative_path);
+extern char* get_file_path_from_relative_path(char* path, char* relative_path);

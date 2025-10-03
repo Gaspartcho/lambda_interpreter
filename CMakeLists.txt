@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.15)
 
 
 project(
-	lambda_interpreter
-	VERSION 0.0.1
-	LANGUAGES C
+ lambda_interpreter
+ VERSION 0.0.1
+ LANGUAGES C
 )
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -22,14 +22,7 @@ file(GLOB_RECURSE SRCS ${SOURCE_DIR}/*.c ${SOURCE_DIR}/*.h )
 add_executable(${PROJECT_NAME} ${SRCS})
 
 
-add_custom_target(valgrind
-	COMMAND valgrind -s $<TARGET_FILE:${PROJECT_NAME}>
-	DEPENDS $<TARGET_FILE:${PROJECT_NAME}>
-	COMMENT "Launching Valgrind"
-)
-
-add_custom_target(run
-	COMMAND $<TARGET_FILE:${PROJECT_NAME}>
-	DEPENDS ${PROJECT_NAME}
-	COMMENT "Launching ${PROJECT_NAME}"
+add_custom_target(proof
+ COMMAND ivette ${SOURCE_DIR}*.c -wp-rte -wp-smoke-tests -wp-counter-examples -wp-prover "Z3,cvc5,Alt-Ergo"
+ COMMENT "Lauching Ivette"
 )

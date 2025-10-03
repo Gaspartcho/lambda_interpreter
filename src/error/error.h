@@ -11,6 +11,11 @@
 #define E_EPT_TOK_NAME E_PARSE_NODE ": empty token name"
 #define E_DIRE_NIMPL   "Directive not implemented yet"
 #define E_INV_TYPE	   "Invalid node type"
+#define E_INV_TYPE_M   E_INV_TYPE ": Supposed to be Macro"
+#define E_INV_TYPE_A   E_INV_TYPE ": Supposed to be Application"
+#define E_INV_TYPE_S   E_INV_TYPE ": Supposed to be String"
+#define E_SELFC		   "Node supposed to be self-contained"
+#define E_NB_ARG	   "Macro definition takes 2 arguments, gave 1"
 #define E_DEF_MAC	   "Macro already defined"
 #define E_UDEF_MAC	   "Macro not defined yet"
 

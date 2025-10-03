@@ -1,6 +1,7 @@
 #pragma once
 
 
+#include <stddef.h>
 #include <stdio.h>
 
 
@@ -14,6 +15,8 @@
 #define APPLY_OPEN	'('
 #define APPLY_CLOSE ')'
 #define BACKSPACE	'\b'
+#define BLANK		'\0'
+#define UNDERSCORE	'_'
 
 #define DISPLAY		  '&'
 #define TREE		  '#'
@@ -28,7 +31,6 @@
 #define COMMENT_CLOSE '%'
 #define STRING_OPEN	  '\"'
 #define STRING_CLOSE  '\"'
-#define EMPTY		  '\0'
 
 #define NB_LETTERS 26
 
@@ -45,9 +47,9 @@ struct parser_t {
 extern bool			  get_parser_next_char(struct parser_t* parser);
 extern struct node_t* parse_next_node(struct parser_t* parser, struct array_t* var_array, struct array_t* mac_array, struct array_t* str_array);
 
-void		  run_file(char filename[], struct array_t* mac_array, struct array_t* str_array);
-extern size_t get_node_str(char** buffer, struct node_t* node);
-extern void	  generate_tree(char** buffer, struct node_t* node);
+void		 run_file(char filename[], struct array_t* mac_array, struct array_t* str_array);
+extern char* get_node_str(struct node_t* node);
+extern char* generate_tree(struct node_t* node);
 
 extern struct node_t* d_identity(struct node_t* node, bool* valid, struct array_t* mac_array, struct array_t* str_array);
 extern struct node_t* d_macro(struct node_t* node, bool* valid, struct array_t* mac_array, struct array_t* str_array);
