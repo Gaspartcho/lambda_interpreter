@@ -115,6 +115,7 @@ struct node_t* replace_var(struct node_t* node, struct node_t* n_node, struct no
 
 struct node_t* apply_directive(struct node_t* node, struct node_t* directive_node, enum status_t* status, struct array_t* mac_array, struct array_t* str_array) {
 
+    // I really don't like this... but it is working... so I'm not touching it anymore...
 	if (directive_node == NULL) return node;
 
 	enum status_t dire_status = Idle;

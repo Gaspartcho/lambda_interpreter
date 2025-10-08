@@ -4,10 +4,10 @@
 (@ TRUE \x y. x)
 (@ FALSE \x y. y)
 
-(@ NOT \a. (a FALSE, TRUE))
-(@ AND \a, b. (a b, FALSE))
-(@ OR \a, b. (a TRUE, b))
-(@ XOR \a, b. (a (b FALSE, TRUE), (b TRUE, FALSE)))
+(@ NOT \b, x, y. (b y, x))
+(@ AND \a, b. (a b, a))
+(@ OR \a, b. (a a, b))
+(@[$] XOR \a, b. (a (NOT b), b))
 
 (@ SUCC \n f x. (f, (n f x)))
 

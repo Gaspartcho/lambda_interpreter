@@ -6,7 +6,7 @@
 #include "runtime.h"
 
 
-#define IMAGE_ELEM(image, row, col) image->data[((row) * image->width) + (col)]
+#define IMAGE_ELEM(image, row, col) (image)->data[((row) * (image)->width) + (col)]
 
 #define VAR_FLAG	N_BIT(8)
 #define FUNC_FLAG	N_BIT(9)
@@ -114,7 +114,10 @@ bool build_tree(struct tree_image_t* image, struct node_t* node) {
 			bool shift_f = build_tree(&func_image, node->func);
 			bool shift_a = build_tree(&arg_image, node->arg);
 
-			resize_image(image, func_image.width + arg_image.width + 1, MAX(func_image.height, arg_image.height) + ((node->func->type == Variable && node->arg->type == Variable) ? 0 : 1));
+			bool squash = (((IMAGE_ELEM(&func_image, func_image.height - 1, shift_f) & VAR_FLAG) && (node->func->type != Application)) || (func_image.height < arg_image.height)) &&
+						  (((IMAGE_ELEM(&arg_image, arg_image.height - 1, shift_a) & VAR_FLAG) && (node->arg->type != Application)) || (func_image.height > arg_image.height));
+
+			resize_image(image, func_image.width + arg_image.width + 1, MAX(func_image.height, arg_image.height) + (squash ? 0 : 1));
 			paste_image(image, &func_image, 0, 0);
 			paste_image(image, &arg_image, 0, func_image.width + 1);
 			free(func_image.data);
@@ -122,7 +125,6 @@ bool build_tree(struct tree_image_t* image, struct node_t* node) {
 
 			IMAGE_ELEM(image, image->height - 1, shift_f) |= APPL_B_FLAG;
 			IMAGE_ELEM(image, image->height - 1, func_image.width + 1 + shift_a) |= APPL_E_FLAG;
-
 
 			for (u_short i = 1 + shift_f; i < func_image.width + 1 + shift_a; i++) {
 				IMAGE_ELEM(image, image->height - 1, i) |= HBAR_FLAG;
@@ -179,7 +181,7 @@ void complete_tree(struct tree_image_t* image) {
 
 			if (IMAGE_ELEM(image, i, j) & VAR_FLAG) {
 				u_short elem = IMAGE_ELEM(image, i, j) & VAL_MASK;
-				for (int k = i - 1; k >= 0; k--) {
+				for (int k = i; k >= 0; k--) {
 					if (elem == (IMAGE_ELEM(image, k, j) & (~FUNC_FLAG))) {
 						IMAGE_ELEM(image, k, j) |= FUNC_E_FLAG;
 						break;

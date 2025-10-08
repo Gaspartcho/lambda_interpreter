@@ -13,10 +13,10 @@
 #define FILE_SEPARATOR '\\'
 #endif
 
-#define XOR(a, b) ((a || b) && !(a && b))
-#define MIN(a, b) ((a < b) ? a : b)
-#define MAX(a, b) ((a > b) ? a : b)
-#define N_BIT(n)  (1 << n)
+#define XOR(a, b) (((a) || (b)) && !((a) && (b)))
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
+#define N_BIT(n)  (1 << (n))
 
 
 extern char get_dire_symbol(directive_t dire);
