@@ -19,7 +19,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror -g")
 
 file(GLOB_RECURSE SRCS ${SOURCE_DIR}/*.c)
 
-add_executable(${PROJECT_NAME} ${SRCS})
+add_executable(lprogi ${SRCS})
 
 
 add_custom_target(proof

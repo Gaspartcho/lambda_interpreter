@@ -2,14 +2,11 @@
 
 
 #include "array.h"
+#include "utils.h"
 
 
 // TODO: add error detection in this place
 
-/*@
-    assigns \nothing;
-    ensures valid_array(\result, size, free_function);
- */
 
 struct array_t* init_array(size_t size, void (*free_function)(void*)) {
 
@@ -18,16 +15,12 @@ struct array_t* init_array(size_t size, void (*free_function)(void*)) {
 	n_array->contents		= malloc(sizeof(*n_array->contents) * size);
 	n_array->size			= 0;
 	n_array->capacity		= size;
-	n_array->free_function	= (free_function == NULL) ? free : free_function;
+	n_array->free_function	= (free_function == NULL) ? free_none : free_function;
 
 
 	return n_array;
 }
 
-
-/*@
-    requires \valid(array);
- */
 
 struct array_t* copy_array(struct array_t* array) {
 

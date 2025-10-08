@@ -20,6 +20,11 @@ struct token_t* get_token_by_name(struct array_t* array, name_t name) {
 }
 
 
+void free_none(void* ptr) {
+    return;
+}
+
+
 void free_mac_token(void* token) {
 	free_node(((struct token_t*)token)->ref);
 	free(token);

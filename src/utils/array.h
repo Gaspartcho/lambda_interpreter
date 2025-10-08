@@ -8,7 +8,7 @@
 
 
 #define ITERATE_ARRAY(arr, index) for (int index = 0; index < arr->size; index++)
-#define ARRAY_ELEM(arr, index)	  arr->contents[index]
+#define ARRAY_ELEM(arr, index)	  (arr)->contents[(index)]
 
 
 struct array_t {
