@@ -113,14 +113,27 @@ struct node_t* replace_var(struct node_t* node, struct node_t* n_node, struct no
 }
 
 
-struct node_t* apply_directive(struct node_t* node, struct node_t* directive_node, struct array_t* mac_array, struct array_t* str_array) {
+struct node_t* apply_directive(struct node_t* node, struct node_t* directive_node, enum status_t* status, struct array_t* mac_array, struct array_t* str_array) {
 
 	if (directive_node == NULL) return node;
 
-	for (bool valid = true; valid;) {
-		node = directive_node->dire(node, &valid, mac_array, str_array);
-		node = apply_directive(node, directive_node->next, mac_array, str_array);
+	enum status_t dire_status = Idle;
+	node					  = directive_node->dire(node, &dire_status, mac_array, str_array);
+
+	if (dire_status == LoopEnd && *status == LoopContinue) {
+		*status = LoopEnd;
+		return node;
 	}
+
+	enum status_t next_status = (dire_status == LoopContinue) ? LoopContinue : *status;
+	node					  = apply_directive(node, directive_node->next, &next_status, mac_array, str_array);
+
+	while (dire_status == LoopBegin && next_status == LoopEnd) {
+		next_status = *status;
+		node		= apply_directive(node, directive_node->next, &next_status, mac_array, str_array);
+	}
+
+	if (next_status == LoopEnd) *status = LoopEnd;
 
 	return node;
 }
@@ -195,7 +208,8 @@ struct node_t* beta_reduce(struct node_t* node, bool* changed, struct array_t* m
 					break;
 				}
 				case Directive: {
-					struct node_t* n_node = apply_directive(node->arg, node->func, mac_array, str_array);
+					enum status_t  status = Idle;
+					struct node_t* n_node = apply_directive(node->arg, node->func, &status, mac_array, str_array);
 					node->arg			  = NULL;
 					free_node(node);
 					node	 = n_node;

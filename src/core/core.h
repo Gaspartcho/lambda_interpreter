@@ -10,16 +10,7 @@
 #define NAME_MAX 255
 
 
-typedef unsigned char  u_char;
-typedef unsigned short u_short;
-typedef unsigned char  depth_t;
-
-
-typedef struct node_t* (*directive_t)(struct node_t*, bool*, struct array_t*, struct array_t*);
-typedef char name_t[NAME_MAX + 1];
-
-
-enum type_t {
+enum type_t : char {
 	Variable,
 	Function,
 	Application,
@@ -27,6 +18,22 @@ enum type_t {
 	Directive,
 	String,
 };
+
+enum status_t : char {
+	Idle,
+	LoopBegin,
+	LoopEnd,
+	LoopBreak,
+	LoopContinue,
+};
+
+
+typedef unsigned char  u_char;
+typedef unsigned short u_short;
+typedef unsigned char  depth_t;
+
+typedef struct node_t* (*directive_t)(struct node_t*, enum status_t*, struct array_t*, struct array_t*);
+typedef char name_t[NAME_MAX + 1];
 
 
 struct token_t {
@@ -70,9 +77,10 @@ extern struct node_t* update_node_ref(struct node_t* node, struct node_t* old_re
 extern struct node_t* update_node_parent(struct node_t* node, struct node_t* parent);
 extern struct node_t* update_node_depth(struct node_t* node);
 
+extern struct node_t* apply_directive(struct node_t* node, struct node_t* directive_node, enum status_t* status, struct array_t* mac_array, struct array_t* str_array);
 extern struct node_t* beta_reduce(struct node_t* node, bool* changed, struct array_t* mac_array, struct array_t* str_array);
 extern struct node_t* mu_factorize(struct node_t* node, bool* changed, struct array_t* mac_array);
 extern struct node_t* mu_expand(struct node_t* node, bool* changed, struct array_t* mac_array);
 extern bool			  is_node_self_contained(struct node_t* node, struct array_t* var_array);
 extern bool			  is_beta_normal(struct node_t* node);
-extern struct node_t* apply_directive(struct node_t* node, struct node_t* directive_node, struct array_t* mac_array, struct array_t* str_array);
+extern bool			  are_node_equal(struct node_t* node_1, struct node_t* node_2);

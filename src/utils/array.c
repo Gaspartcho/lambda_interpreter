@@ -6,10 +6,16 @@
 
 // TODO: add error detection in this place
 
+/*@
+    assigns \nothing;
+    ensures valid_array(\result, size, free_function);
+ */
+
 struct array_t* init_array(size_t size, void (*free_function)(void*)) {
 
 	struct array_t* n_array = malloc(sizeof(*n_array));
-	n_array->content		= malloc(sizeof(*n_array->content) * size);
+	//@ assert \valid((char*) n_array);
+	n_array->contents		= malloc(sizeof(*n_array->contents) * size);
 	n_array->size			= 0;
 	n_array->capacity		= size;
 	n_array->free_function	= (free_function == NULL) ? free : free_function;
@@ -18,11 +24,16 @@ struct array_t* init_array(size_t size, void (*free_function)(void*)) {
 	return n_array;
 }
 
+
+/*@
+    requires \valid(array);
+ */
+
 struct array_t* copy_array(struct array_t* array) {
 
 	struct array_t* n_array						= init_array(array->capacity, array->free_function);
 	n_array->size								= array->size;
-	ITERATE_ARRAY(array, i) n_array->content[i] = array->content[i];
+	ITERATE_ARRAY(array, i) n_array->contents[i] = array->contents[i];
 
 	return n_array;
 }
@@ -31,14 +42,14 @@ void add_array_elem(struct array_t* array, void* elem) {
 
 	if (array->size == array->capacity) {
 		void** n_contents					  = malloc(sizeof(*n_contents) * (array->capacity * 2));
-		ITERATE_ARRAY(array, i) n_contents[i] = array->content[i];
+		ITERATE_ARRAY(array, i) n_contents[i] = array->contents[i];
 
-		free(array->content);
-		array->content = n_contents;
+		free(array->contents);
+		array->contents = n_contents;
 		array->capacity *= 2;
 	}
 
-	array->content[array->size] = elem;
+	array->contents[array->size] = elem;
 	array->size += 1;
 
 	return;
@@ -47,31 +58,31 @@ void add_array_elem(struct array_t* array, void* elem) {
 void* pop_array_elem(struct array_t* array) {
 
 	if (array->size == 0) {
-		free_array(array);
+
 		return NULL;
 	}
 
 	if (array->size <= array->capacity / 2 && array->size > 1) {
 
 		void** n_contents					  = malloc(sizeof(*n_contents) * (array->capacity / 2));
-		ITERATE_ARRAY(array, i) n_contents[i] = array->content[i];
+		ITERATE_ARRAY(array, i) n_contents[i] = array->contents[i];
 
-		free(array->content);
-		array->content = n_contents;
+		free(array->contents);
+		array->contents = n_contents;
 		array->capacity /= 2;
 	}
 
 	array->size--;
 
-	void* ret_val = array->content[array->size];
+	void* ret_val = array->contents[array->size];
 
 	return ret_val;
 }
 
 void free_array(struct array_t* array) {
 
-	ITERATE_ARRAY(array, i) array->free_function(array->content[i]);
-	free(array->content);
+	ITERATE_ARRAY(array, i) array->free_function(array->contents[i]);
+	free(array->contents);
 	free(array);
 
 	return;

@@ -9,13 +9,13 @@
 
 
 struct token_t* get_token_by_ref(struct array_t* array, struct node_t* ref) {
-	ITERATE_ARRAY(array, i) if (((struct token_t*)array->content[i])->ref == ref) return array->content[i];
+	ITERATE_ARRAY(array, i) if (((struct token_t*)array->contents[i])->ref == ref) return array->contents[i];
 	return NULL;
 }
 
 
 struct token_t* get_token_by_name(struct array_t* array, name_t name) {
-	ITERATE_ARRAY(array, i) if (!strcmp(((struct token_t*)array->content[i])->name, name)) return array->content[i];
+	ITERATE_ARRAY(array, i) if (!strcmp(((struct token_t*)array->contents[i])->name, name)) return array->contents[i];
 	return NULL;
 }
 

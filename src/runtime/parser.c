@@ -1,4 +1,5 @@
 #include <ctype.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -56,7 +57,7 @@ bool pattern_macro_name(char c) {
 }
 
 bool pattern_directive_name(char c) {
-	return c == INCLUDE || c == EXPAND || c == FACTORIZE || c == MACRO || c == DISPLAY || c == TREE || c == EVAL || c == EVAL_ONCE || c == EVAL_EACH;
+	return c == INCLUDE || c == EXPAND || c == FACTORIZE || c == MACRO || c == DISPLAY || c == TREE || c == EVAL || c == LOOP_OPEN || c == LOOP_CLOSE || c == ASK || c == IDENTITY;
 }
 
 bool pattern_string(char c) {
@@ -164,21 +165,22 @@ struct node_t* parse_directive(struct parser_t* parser) {
 
 	if (nb_syms == 0) error_s(E_INV_TOK_NAME, syms);
 
-	struct node_t* n_dire = create_directive(NULL, NULL, d_identity);
+	struct node_t* n_dire = CREATE_NULL_NODE;
 	struct node_t* s_dire = n_dire;
 
 	for (u_short i = 0; i < nb_syms; i++) {
 		switch (syms[i]) {
-			case BLANK:		s_dire->dire = d_identity; break;
-			case INCLUDE:	s_dire->dire = d_include; break;
-			case MACRO:		s_dire->dire = d_macro; break;
-			case FACTORIZE: s_dire->dire = d_factorize; break;
-			case EXPAND:	s_dire->dire = d_expand; break;
-			case DISPLAY:	s_dire->dire = d_display; break;
-			case TREE:		s_dire->dire = d_tree; break;
-			case EVAL:		s_dire->dire = d_evaluate; break;
-			case EVAL_ONCE: s_dire->dire = d_eval_once; break;
-			case EVAL_EACH: s_dire->dire = d_eval_each; break;
+			case IDENTITY:		 s_dire->dire = d_identity; break;
+			case LOOP_OPEN:	 s_dire->dire = d_loop_begin; break;
+			case LOOP_CLOSE: s_dire->dire = d_loop_end; break;
+			case ASK:		 s_dire->dire = d_ask; break;
+			case MACRO:		 s_dire->dire = d_macro; break;
+			case INCLUDE:	 s_dire->dire = d_include; break;
+			case FACTORIZE:	 s_dire->dire = d_factorize; break;
+			case EXPAND:	 s_dire->dire = d_expand; break;
+			case EVAL:		 s_dire->dire = d_evaluate; break;
+			case DISPLAY:	 s_dire->dire = d_display; break;
+			case TREE:		 s_dire->dire = d_tree; break;
 
 			default:
 				error_c(E_INV_TOK, syms[i]);

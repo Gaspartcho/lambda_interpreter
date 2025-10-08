@@ -36,6 +36,8 @@ Syntax:
 (ANY, ANY)
 ```
 
+The following two lines are equivalent:
+
 ```lp
 ((F, G) H)
 (F, G, H)
@@ -78,6 +80,8 @@ Syntax:
 
 #### Tree
 
+Displays the element given in argument as _Tromp Diagram_ (See [https://tromp.github.io/cl/diagrams.html](https://tromp.github.io/cl/diagrams.html))
+
 Syntax:
 
 ```lp
@@ -103,6 +107,8 @@ Syntax:
 (@ MACRO ANY)
 ((@ MACRO) ANY)
 ```
+
+Any directives placed after the macro definition symbol will be applied to the macro data (the `ANY` above)
 
 
 

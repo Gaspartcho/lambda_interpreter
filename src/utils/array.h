@@ -8,14 +8,14 @@
 
 
 #define ITERATE_ARRAY(arr, index) for (int index = 0; index < arr->size; index++)
-#define ARRAY_ELEM(arr, index)	  arr->content[index]
+#define ARRAY_ELEM(arr, index)	  arr->contents[index]
 
 
 struct array_t {
 	size_t size;
 	size_t capacity;
 	void (*free_function)(void*);
-	void** content;
+	void** contents;
 };
 
 
