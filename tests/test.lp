@@ -1,14 +1,15 @@
 (* "std.lp")
 
-%($& (THREE "abo"  dwdd   , "caf"))%
+(@ FORMULA  \a, b. (IFF (IFF a, b), (NOT (XOR a, b))))
+(@ CHECK_TOTOLOGY \formula. (AND
+    (AND
+        (formula TRUE TRUE),
+        (formula TRUE FALSE)
+    )
+    (AND
+        (formula FALSE TRUE),
+        (formula FALSE FALSE)
+    )
+))
 
-
-%([#$?] (SUCC (SUCC THREE)))%
-
-(@[$] OTHER_OR \a, b. (NOT (AND (NOT a), (NOT b))))
-(@[$] OTHER_XOR \a, b. (AND (OR a, b), (NOT (AND a, b))))
-
-%
-([+][#$] (OR, TRUE, TRUE))
-([#$][-]# (XOR, TRUE, FALSE))
-%
+([$][-]& (CHECK_TOTOLOGY FORMULA))

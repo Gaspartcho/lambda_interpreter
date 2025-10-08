@@ -81,9 +81,7 @@ struct node_t* d_display(struct node_t* node, enum status_t* status, struct arra
 
 	if (status == NULL) return (struct node_t*)DISPLAY;
 
-	update_node_depth(node);
-
-	char* name = get_node_str(node);
+	char* name = get_node_str(update_node_depth(node));
 	printf("%s\n", name);
 	free(name);
 

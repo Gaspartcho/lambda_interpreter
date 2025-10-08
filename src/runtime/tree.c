@@ -94,9 +94,12 @@ bool build_tree(struct tree_image_t* image, struct node_t* node) {
 		case Function: {
 			struct tree_image_t body_image;
 			init_image(&body_image, 1, 1);
-			bool shift = build_tree(&body_image, node->body);
+			build_tree(&body_image, node->body);
 
-			resize_image(image, body_image.width + (shift ? 0 : 2), body_image.height + 1);
+			bool shift = IMAGE_ELEM(&body_image, 0, 0) & FUNC_FLAG;
+			bool extend = IMAGE_ELEM(&body_image, 0, body_image.width-1) & FUNC_FLAG;
+
+			resize_image(image, body_image.width + (shift ? 0 : 1) + (extend ? 0 : 1), body_image.height + 1);
 			paste_image(image, &body_image, 1, (shift ? 0 : 1));
 			free(body_image.data);
 

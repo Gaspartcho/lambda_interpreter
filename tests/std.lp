@@ -8,6 +8,8 @@
 (@ AND \a, b. (a b, a))
 (@ OR \a, b. (a a, b))
 (@[$] XOR \a, b. (a (NOT b), b))
+(@[$] IMPL \a, b. (a b, (NOT a)))
+(@[$] IFF \a, b. (a b, (NOT b)))
 
 (@ SUCC \n f x. (f, (n f x)))
 

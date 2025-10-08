@@ -71,10 +71,10 @@ struct node_t* parse_var(struct parser_t* parser, struct array_t* var_array) {
 	parse_name(parser, name, pattern_char_name);
 	if (strlen(name) == 0) error(E_EPT_TOK_NAME);
 
-	struct node_t* ref = get_token_by_name(var_array, name)->ref;
-	if (ref == NULL) error_s(E_UNK_TOK_NAME, name);
+	struct token_t* token = get_token_by_name(var_array, name);
+	if (token == NULL) error_s(E_UNK_TOK_NAME, name);
 
-	return create_variable(NULL, ref);
+	return create_variable(NULL, token->ref);
 }
 
 
