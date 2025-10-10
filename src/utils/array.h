@@ -19,7 +19,7 @@ struct array_t {
 };
 
 
-extern struct array_t* init_array(size_t size, void (*free_function)(void*));
+extern struct array_t* create_array(size_t size, void (*free_function)(void*));
 extern struct array_t* copy_array(struct array_t* array);
 extern void			   add_array_elem(struct array_t* array, void* elem);
 extern void*		   pop_array_elem(struct array_t* array);

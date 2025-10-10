@@ -1,7 +1,7 @@
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <limits.h>
 
 
 #include "../error/error.h"
@@ -21,7 +21,7 @@ struct token_t* get_token_by_name(struct array_t* array, name_t name) {
 
 
 void free_none(void* ptr) {
-    return;
+	return;
 }
 
 

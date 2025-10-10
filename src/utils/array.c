@@ -8,14 +8,13 @@
 // TODO: add error detection in this place
 
 
-struct array_t* init_array(size_t size, void (*free_function)(void*)) {
+struct array_t* create_array(size_t size, void (*free_function)(void*)) {
 
 	struct array_t* n_array = malloc(sizeof(*n_array));
-	//@ assert \valid((char*) n_array);
-	n_array->contents		= malloc(sizeof(*n_array->contents) * size);
-	n_array->size			= 0;
-	n_array->capacity		= size;
-	n_array->free_function	= (free_function == NULL) ? free_none : free_function;
+	n_array->contents	   = malloc(sizeof(*n_array->contents) * size);
+	n_array->size		   = 0;
+	n_array->capacity	   = size;
+	n_array->free_function = (free_function == NULL) ? free_none : free_function;
 
 
 	return n_array;
@@ -24,8 +23,8 @@ struct array_t* init_array(size_t size, void (*free_function)(void*)) {
 
 struct array_t* copy_array(struct array_t* array) {
 
-	struct array_t* n_array						= init_array(array->capacity, array->free_function);
-	n_array->size								= array->size;
+	struct array_t* n_array						 = create_array(array->capacity, array->free_function);
+	n_array->size								 = array->size;
 	ITERATE_ARRAY(array, i) n_array->contents[i] = array->contents[i];
 
 	return n_array;

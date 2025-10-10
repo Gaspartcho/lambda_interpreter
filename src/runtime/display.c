@@ -40,6 +40,7 @@ size_t get_node_size(struct node_t* node) {
 		case Application: return get_node_size(node->func) + get_node_size(node->arg) + 4;
 		case Macro:		  return strlen(node->token->name);
 		case Directive:	  return get_node_size(node->next) + 1;
+		case Loop:		  return get_node_size(node->start) + get_node_size(node->next) + 2;
 		case String:	  return strlen(node->str) + 2;
 	}
 
@@ -81,9 +82,18 @@ void write_node(char* buffer, struct node_t* node) {
 
 		case Macro: strcpy(buffer, node->token->name); break;
 
-		case Directive: {
+		case Directive:
 			buffer[0] = get_dire_symbol(node->dire);
 			write_node(buffer + 1, node->next);
+			break;
+
+
+		case Loop: {
+			size_t start_size = get_node_size(node->start);
+			buffer[0]		  = LOOP_OPEN;
+			write_node(buffer + 1, node->start);
+			buffer[start_size + 1] = LOOP_CLOSE;
+			write_node(buffer + start_size + 2, node->next);
 			break;
 		}
 
@@ -91,6 +101,7 @@ void write_node(char* buffer, struct node_t* node) {
 			buffer[0] = STRING_OPEN;
 			strcpy(buffer + 1, node->str);
 			buffer[strlen(node->str) + 1] = STRING_CLOSE;
+			break;
 	}
 }
 

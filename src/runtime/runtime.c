@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 
@@ -26,7 +27,7 @@ void run_file(char filename[], struct array_t* mac_array, struct array_t* str_ar
 void exec_file(FILE* file, bool interactive, struct array_t* mac_array, struct array_t* str_array) {
 
 	struct parser_t parser	  = {.file = file, .next_char = BLANK};
-	struct array_t* var_array = init_array(DEFAULT_ARRAY_LENGTH, free);
+	struct array_t* var_array = create_array(DEFAULT_ARRAY_LENGTH, free);
 
 	if (interactive) printf("> ");
 
@@ -35,6 +36,7 @@ void exec_file(FILE* file, bool interactive, struct array_t* mac_array, struct a
 	struct node_t* null_node = CREATE_NULL_NODE;
 
 	while (parser.next_char != EOF) {
+
 		struct node_t* node = update_node_parent(parse_next_node(&parser, var_array, mac_array, str_array), NULL);
 
 		for (bool changed = true; changed;) {

@@ -53,14 +53,12 @@ extern void	 exec_file(FILE* file, bool interactive, struct array_t* mac_array, 
 extern char* get_node_str(struct node_t* node);
 extern char* generate_tree(struct node_t* node);
 
-extern struct node_t* d_identity(struct node_t* node, enum status_t* status, struct array_t* mac_array, struct array_t* str_array);
-extern struct node_t* d_loop_begin(struct node_t* node, enum status_t* status, struct array_t* mac_array, struct array_t* str_array);
-extern struct node_t* d_loop_end(struct node_t* node, enum status_t* status, struct array_t* mac_array, struct array_t* str_array);
-extern struct node_t* d_ask(struct node_t* node, enum status_t* status, struct array_t* mac_array, struct array_t* str_array);
-extern struct node_t* d_macro(struct node_t* node, enum status_t* status, struct array_t* mac_array, struct array_t* str_array);
-extern struct node_t* d_include(struct node_t* node, enum status_t* status, struct array_t* mac_array, struct array_t* str_array);
-extern struct node_t* d_factorize(struct node_t* node, enum status_t* status, struct array_t* mac_array, struct array_t* str_array);
-extern struct node_t* d_expand(struct node_t* node, enum status_t* status, struct array_t* mac_array, struct array_t* str_array);
-extern struct node_t* d_evaluate(struct node_t* node, enum status_t* status, struct array_t* mac_array, struct array_t* str_array);
-extern struct node_t* d_display(struct node_t* node, enum status_t* status, struct array_t* mac_array, struct array_t* str_array);
-extern struct node_t* d_tree(struct node_t* node, enum status_t* status, struct array_t* mac_array, struct array_t* str_array);
+extern struct node_t* d_identity(struct node_t* node, bool* loop, struct array_t* mac_array, struct array_t* str_array);
+extern struct node_t* d_ask(struct node_t* node, bool* loop, struct array_t* mac_array, struct array_t* str_array);
+extern struct node_t* d_macro(struct node_t* node, bool* loop, struct array_t* mac_array, struct array_t* str_array);
+extern struct node_t* d_include(struct node_t* node, bool* loop, struct array_t* mac_array, struct array_t* str_array);
+extern struct node_t* d_factorize(struct node_t* node, bool* loop, struct array_t* mac_array, struct array_t* str_array);
+extern struct node_t* d_expand(struct node_t* node, bool* loop, struct array_t* mac_array, struct array_t* str_array);
+extern struct node_t* d_evaluate(struct node_t* node, bool* loop, struct array_t* mac_array, struct array_t* str_array);
+extern struct node_t* d_display(struct node_t* node, bool* loop, struct array_t* mac_array, struct array_t* str_array);
+extern struct node_t* d_tree(struct node_t* node, bool* loop, struct array_t* mac_array, struct array_t* str_array);

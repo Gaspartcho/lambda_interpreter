@@ -34,11 +34,16 @@ struct node_t* update_node_parent(struct node_t* node, struct node_t* parent) {
 	node->parent = parent;
 
 	switch (node->type) {
-		default:	   break;
-		case Function: update_node_parent(node->body, node); break;
+		default:		break;
+		case Function:	update_node_parent(node->body, node); break;
+		case Directive: update_node_parent(node->next, node); break;
 		case Application:
 			update_node_parent(node->func, node);
 			update_node_parent(node->arg, node);
+			break;
+		case Loop:
+			update_node_parent(node->start, node);
+			update_node_parent(node->next, node);
 			break;
 	}
 
@@ -85,7 +90,7 @@ bool is_beta_normal(struct node_t* node) {
 		default:		  return true; break;
 		case Macro:		  return false; break;
 		case Function:	  return is_beta_normal(node->body); break;
-		case Application: return is_beta_normal(node->arg) && is_beta_normal(node->func) && !(node->func->type == Function || node->func->type == Directive); break;
+		case Application: return is_beta_normal(node->arg) && is_beta_normal(node->func) && !(node->func->type == Function || node->func->type == Directive || node->func->type == Loop); break;
 	}
 }
 
@@ -113,28 +118,27 @@ struct node_t* replace_var(struct node_t* node, struct node_t* n_node, struct no
 }
 
 
-struct node_t* apply_directive(struct node_t* node, struct node_t* directive_node, enum status_t* status, struct array_t* mac_array, struct array_t* str_array) {
+struct node_t* apply_directive(struct node_t* node, struct node_t* directive_node, bool* loop, struct array_t* mac_array, struct array_t* str_array) {
 
-    // I really don't like this... but it is working... so I'm not touching it anymore...
 	if (directive_node == NULL) return node;
 
-	enum status_t dire_status = Idle;
-	node					  = directive_node->dire(node, &dire_status, mac_array, str_array);
-
-	if (dire_status == LoopEnd && *status == LoopContinue) {
-		*status = LoopEnd;
-		return node;
+	switch (directive_node->type) {
+		default:		error_c(E_INV_TYPE, '1' + directive_node->type); break;
+		case Directive: {
+			bool do_loop = false;
+			node		 = directive_node->dire(node, &do_loop, mac_array, str_array);
+			*loop |= do_loop;
+			break;
+		}
+		case Loop:
+			for (bool do_loop = true; do_loop;) {
+				do_loop = false;
+				node	= apply_directive(node, directive_node->start, &do_loop, mac_array, str_array);
+			}
+			break;
 	}
 
-	enum status_t next_status = (dire_status == LoopContinue) ? LoopContinue : *status;
-	node					  = apply_directive(node, directive_node->next, &next_status, mac_array, str_array);
-
-	while (dire_status == LoopBegin && next_status == LoopEnd) {
-		next_status = *status;
-		node		= apply_directive(node, directive_node->next, &next_status, mac_array, str_array);
-	}
-
-	if (next_status == LoopEnd) *status = LoopEnd;
+	node = apply_directive(node, directive_node->next, loop, mac_array, str_array);
 
 	return node;
 }
@@ -174,6 +178,8 @@ bool are_node_equal(struct node_t* node_1, struct node_t* node_2) {
 		case Application: return are_node_equal(node_1->func, node_2->func) && are_node_equal(node_1->arg, node_2->arg); break;
 		case Macro:		  return node_1->token == node_2->token; break;
 		case Directive:	  return get_dire_symbol(node_1->dire) == get_dire_symbol(node_2->dire) && are_node_equal(node_1->next, node_2->next); break;
+		case Loop:		  return are_node_equal(node_1->start, node_2->start) && are_node_equal(node_1->start, node_2->start);
+		case String:	  return node_1->str == node_2->str;
 	}
 }
 
@@ -196,6 +202,7 @@ struct node_t* beta_reduce(struct node_t* node, bool* changed, struct array_t* m
 
 		case Application:
 			switch (node->func->type) {
+
 				default:
 					node->func = beta_reduce(node->func, changed, mac_array, str_array);
 					if (!(*changed)) node->arg = beta_reduce(node->arg, changed, mac_array, str_array);
@@ -208,9 +215,10 @@ struct node_t* beta_reduce(struct node_t* node, bool* changed, struct array_t* m
 					*changed = true;
 					break;
 				}
-				case Directive: {
-					enum status_t  status = Idle;
-					struct node_t* n_node = apply_directive(node->arg, node->func, &status, mac_array, str_array);
+				case Directive:
+				case Loop:		{
+					bool		   loop	  = false;
+					struct node_t* n_node = apply_directive(node->arg, node->func, &loop, mac_array, str_array);
 					node->arg			  = NULL;
 					free_node(node);
 					node	 = n_node;
@@ -229,7 +237,7 @@ struct node_t* mu_factorize(struct node_t* node, bool* changed, struct array_t* 
 
 	if (node == NULL) return NULL;
 
-	struct array_t* var_array = init_array(DEFAULT_ARRAY_LENGTH, free);
+	struct array_t* var_array = create_array(DEFAULT_ARRAY_LENGTH, free);
 	if (is_node_self_contained(node, var_array)) {
 
 		update_node_depth(update_node_parent(node, NULL));

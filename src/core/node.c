@@ -67,6 +67,19 @@ struct node_t* create_directive(struct node_t* parent, struct node_t* next, dire
 }
 
 
+struct node_t* create_loop(struct node_t* parent, struct node_t* start, struct node_t* next) {
+
+	struct node_t* n_loop = malloc(sizeof(*n_loop));
+
+	n_loop->type   = Loop;
+	n_loop->parent = parent;
+	n_loop->start  = start;
+	n_loop->next   = next;
+
+	return n_loop;
+}
+
+
 struct node_t* create_string(struct node_t* parent, char* data) {
 
 	struct node_t* n_str = malloc(sizeof(*n_str));
@@ -90,7 +103,8 @@ struct node_t* copy_node(struct node_t* node) {
 		case Application: return create_application(NULL, copy_node(node->func), copy_node(node->arg)); break;
 		case Macro:		  return create_macro(NULL, node->token); break;
 		case Directive:	  return create_directive(NULL, copy_node(node->next), node->dire); break;
-		case String:	  return create_string(NULL, node->str);
+		case Loop:		  return create_loop(NULL, copy_node(node->start), copy_node(node->next)); break;
+		case String:	  return create_string(NULL, node->str); break;
 
 		case Function: {
 			struct node_t* n_node = create_function(NULL, copy_node(node->body));
@@ -98,6 +112,7 @@ struct node_t* copy_node(struct node_t* node) {
 			break;
 		}
 	}
+
 	return NULL;
 }
 
@@ -115,6 +130,10 @@ void free_node(struct node_t* node) {
 		case Application:
 			free_node(node->func);
 			free_node(node->arg);
+			break;
+		case Loop:
+			free_node(node->start);
+			free_node(node->next);
 			break;
 	}
 

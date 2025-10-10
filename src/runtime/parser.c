@@ -1,5 +1,6 @@
 #include <ctype.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -33,7 +34,7 @@ bool get_parser_next_char(struct parser_t* parser) {
 }
 
 
-void parse_name(struct parser_t* parser, char* name, bool (*pattern_func)(char)) {
+bool parse_name(struct parser_t* parser, char* name, bool (*pattern_func)(char)) {
 
 	u_short i;
 	bool	same_tok = true;
@@ -44,7 +45,7 @@ void parse_name(struct parser_t* parser, char* name, bool (*pattern_func)(char))
 	}
 	name[i] = BLANK;
 
-	return;
+	return same_tok;
 }
 
 
@@ -57,7 +58,7 @@ bool pattern_macro_name(char c) {
 }
 
 bool pattern_directive_name(char c) {
-	return c == INCLUDE || c == EXPAND || c == FACTORIZE || c == MACRO || c == DISPLAY || c == TREE || c == EVAL || c == LOOP_OPEN || c == LOOP_CLOSE || c == ASK || c == IDENTITY;
+	return c == INCLUDE || c == EXPAND || c == FACTORIZE || c == MACRO || c == DISPLAY || c == TREE || c == EVAL || c == ASK || c == IDENTITY;
 }
 
 bool pattern_string(char c) {
@@ -159,41 +160,52 @@ struct node_t* parse_macro(struct parser_t* parser, struct array_t* mac_array) {
 
 struct node_t* parse_directive(struct parser_t* parser) {
 
-	name_t syms;
-	parse_name(parser, syms, pattern_directive_name);
-	const u_short nb_syms = strlen(syms);
-
-	if (nb_syms == 0) error_s(E_INV_TOK_NAME, syms);
-
-	struct node_t* n_dire = CREATE_NULL_NODE;
-	struct node_t* s_dire = n_dire;
+	name_t		   syms;
+	bool		   same_tok = parse_name(parser, syms, pattern_directive_name);
+	const u_short  nb_syms	= strlen(syms);
+	struct node_t* n_dire	= CREATE_NULL_NODE;
+	struct node_t* s_dire	= n_dire;
 
 	for (u_short i = 0; i < nb_syms; i++) {
+		s_dire->next = create_directive(s_dire, NULL, d_identity);
+		s_dire		 = s_dire->next;
+
 		switch (syms[i]) {
-			case IDENTITY:		 s_dire->dire = d_identity; break;
-			case LOOP_OPEN:	 s_dire->dire = d_loop_begin; break;
-			case LOOP_CLOSE: s_dire->dire = d_loop_end; break;
-			case ASK:		 s_dire->dire = d_ask; break;
-			case MACRO:		 s_dire->dire = d_macro; break;
-			case INCLUDE:	 s_dire->dire = d_include; break;
-			case FACTORIZE:	 s_dire->dire = d_factorize; break;
-			case EXPAND:	 s_dire->dire = d_expand; break;
-			case EVAL:		 s_dire->dire = d_evaluate; break;
-			case DISPLAY:	 s_dire->dire = d_display; break;
-			case TREE:		 s_dire->dire = d_tree; break;
+			case IDENTITY:	s_dire->dire = d_identity; break;
+			case ASK:		s_dire->dire = d_ask; break;
+			case MACRO:		s_dire->dire = d_macro; break;
+			case INCLUDE:	s_dire->dire = d_include; break;
+			case FACTORIZE: s_dire->dire = d_factorize; break;
+			case EXPAND:	s_dire->dire = d_expand; break;
+			case EVAL:		s_dire->dire = d_evaluate; break;
+			case DISPLAY:	s_dire->dire = d_display; break;
+			case TREE:		s_dire->dire = d_tree; break;
 
 			default:
 				error_c(E_INV_TOK, syms[i]);
 				return NULL;
 				break;
 		}
-
-		s_dire->next = create_directive(s_dire, NULL, d_identity);
-		s_dire		 = s_dire->next;
 	}
 
-	s_dire->parent->next = NULL;
-	free_node(s_dire);
+	if (parser->next_char == LOOP_OPEN && same_tok) {
+
+		get_parser_next_char(parser);
+		s_dire->next = create_loop(s_dire, parse_directive(parser), NULL);
+		s_dire		 = s_dire->next;
+
+		if (parser->next_char != LOOP_CLOSE) error_c(E_INV_TOK, parser->next_char);
+
+		if (!get_parser_next_char(parser)) s_dire->next = parse_directive(parser);
+
+	} else if (nb_syms == 0) {
+		free_node(n_dire);
+		return NULL;
+	}
+
+	n_dire = n_dire->next;
+	n_dire->parent->next = NULL;
+	free_node(n_dire->parent);
 
 	return n_dire;
 }
@@ -220,7 +232,7 @@ struct node_t* parse_next_node(struct parser_t* parser, struct array_t* var_arra
 	if (parser->next_char == APPLY_OPEN) return parse_application(parser, var_array, mac_array, str_array);
 	if (pattern_char_name(parser->next_char)) return parse_var(parser, var_array);
 	if (pattern_macro_name(parser->next_char)) return parse_macro(parser, mac_array);
-	if (pattern_directive_name(parser->next_char)) return parse_directive(parser);
+	if (pattern_directive_name(parser->next_char) || parser->next_char == LOOP_OPEN) return parse_directive(parser);
 	if (parser->next_char == STRING_OPEN) return parse_string(parser, str_array);
 
 	error_c(E_INV_TOK, parser->next_char);

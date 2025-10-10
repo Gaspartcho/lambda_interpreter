@@ -96,8 +96,8 @@ bool build_tree(struct tree_image_t* image, struct node_t* node) {
 			init_image(&body_image, 1, 1);
 			build_tree(&body_image, node->body);
 
-			bool shift = IMAGE_ELEM(&body_image, 0, 0) & FUNC_FLAG;
-			bool extend = IMAGE_ELEM(&body_image, 0, body_image.width-1) & FUNC_FLAG;
+			bool shift	= IMAGE_ELEM(&body_image, 0, 0) & FUNC_FLAG;
+			bool extend = IMAGE_ELEM(&body_image, 0, body_image.width - 1) & FUNC_FLAG;
 
 			resize_image(image, body_image.width + (shift ? 0 : 1) + (extend ? 0 : 1), body_image.height + 1);
 			paste_image(image, &body_image, 1, (shift ? 0 : 1));
@@ -146,18 +146,6 @@ bool build_tree(struct tree_image_t* image, struct node_t* node) {
 			return false;
 		}
 
-		case String: {
-			char* name = node->str;
-			resize_image(image, strlen(name) + 2, 1);
-			IMAGE_ELEM(image, 0, 0)				   = STRING_OPEN;
-			IMAGE_ELEM(image, 0, image->width - 1) = STRING_CLOSE;
-
-			for (u_short i = 0; name[i] != '\0'; i++)
-				IMAGE_ELEM(image, 0, i + 1) = name[i];
-
-			return false;
-		}
-
 		case Directive: {
 			struct tree_image_t next_image;
 			init_image(&next_image, 1, 1);
@@ -168,6 +156,36 @@ bool build_tree(struct tree_image_t* image, struct node_t* node) {
 			free(next_image.data);
 
 			IMAGE_ELEM(image, 0, 0) = get_dire_symbol(node->dire);
+
+			return false;
+		}
+
+		case Loop: {
+			struct tree_image_t start_image;
+			struct tree_image_t next_image;
+			init_image(&start_image, 1, 1);
+			init_image(&next_image, 1, 1);
+			build_tree(&start_image, node->start);
+			build_tree(&next_image, node->next);
+
+			resize_image(image, start_image.width + next_image.width + 2, 1);
+			paste_image(image, &start_image, 0, 1);
+			paste_image(image, &next_image, 0, start_image.width + 2);
+			free(start_image.data);
+			free(next_image.data);
+
+			IMAGE_ELEM(image, 0, 0)					   = LOOP_OPEN;
+			IMAGE_ELEM(image, 0, next_image.width + 1) = LOOP_CLOSE;
+		}
+
+		case String: {
+			char* name = node->str;
+			resize_image(image, strlen(name) + 2, 1);
+			IMAGE_ELEM(image, 0, 0)				   = STRING_OPEN;
+			IMAGE_ELEM(image, 0, image->width - 1) = STRING_CLOSE;
+
+			for (u_short i = 0; name[i] != '\0'; i++)
+				IMAGE_ELEM(image, 0, i + 1) = name[i];
 
 			return false;
 		}
