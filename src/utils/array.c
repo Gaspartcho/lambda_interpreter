@@ -1,3 +1,4 @@
+#include <stddef.h>
 #include <stdlib.h>
 
 
@@ -11,10 +12,10 @@
 struct array_t* create_array(size_t size, void (*free_function)(void*)) {
 
 	struct array_t* n_array = malloc(sizeof(*n_array));
-	n_array->contents	   = malloc(sizeof(*n_array->contents) * size);
-	n_array->size		   = 0;
-	n_array->capacity	   = size;
-	n_array->free_function = (free_function == NULL) ? free_none : free_function;
+	n_array->contents		= malloc(sizeof(*n_array->contents) * size);
+	n_array->size			= 0;
+	n_array->capacity		= size;
+	n_array->free_function	= (free_function == NULL) ? free_none : free_function;
 
 
 	return n_array;
@@ -30,16 +31,22 @@ struct array_t* copy_array(struct array_t* array) {
 	return n_array;
 }
 
+
+void resize_array(struct array_t* array, size_t n_size) {
+	void** n_contents = malloc(sizeof(*n_contents) * n_size);
+	for (size_t i = 0; i < MIN(array->size, n_size); i++)
+		n_contents[i] = array->contents[i];
+
+	free(array->contents);
+	array->contents = n_contents;
+	array->capacity = n_size;
+
+	return;
+}
+
 void add_array_elem(struct array_t* array, void* elem) {
 
-	if (array->size == array->capacity) {
-		void** n_contents					  = malloc(sizeof(*n_contents) * (array->capacity * 2));
-		ITERATE_ARRAY(array, i) n_contents[i] = array->contents[i];
-
-		free(array->contents);
-		array->contents = n_contents;
-		array->capacity *= 2;
-	}
+	if (array->size == array->capacity) resize_array(array, array->size * 2);
 
 	array->contents[array->size] = elem;
 	array->size += 1;
@@ -49,26 +56,12 @@ void add_array_elem(struct array_t* array, void* elem) {
 
 void* pop_array_elem(struct array_t* array) {
 
-	if (array->size == 0) {
+	if (array->size == 0) return NULL;
 
-		return NULL;
-	}
-
-	if (array->size <= array->capacity / 2 && array->size > 1) {
-
-		void** n_contents					  = malloc(sizeof(*n_contents) * (array->capacity / 2));
-		ITERATE_ARRAY(array, i) n_contents[i] = array->contents[i];
-
-		free(array->contents);
-		array->contents = n_contents;
-		array->capacity /= 2;
-	}
-
+	if (array->size <= array->capacity / 2 && array->size > 1) resize_array(array, array->capacity / 2);
 	array->size--;
 
-	void* ret_val = array->contents[array->size];
-
-	return ret_val;
+	return ARRAY_ELEM(array, array->size);
 }
 
 void free_array(struct array_t* array) {
