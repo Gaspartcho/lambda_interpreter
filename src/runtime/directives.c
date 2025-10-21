@@ -133,3 +133,14 @@ struct node_t* d_include(struct node_t* node, bool* loop, struct array_t* mac_ar
 
 	return node;
 }
+
+
+struct node_t* d_discard(struct node_t* node, bool* loop, struct array_t* mac_array, struct array_t* str_array) {
+
+	if (loop == NULL) return (struct node_t*)DISCARD;
+
+	struct node_t* identity = create_directive(node->parent, NULL, d_identity);
+	free_node(node);
+
+	return identity;
+}

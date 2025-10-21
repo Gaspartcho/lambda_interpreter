@@ -30,6 +30,7 @@
 #define EXPAND	   '+'
 #define DISPLAY	   '&'
 #define TREE	   '#'
+#define DISCARD	   '!'
 
 #define COMMENT_OPEN  '%'
 #define COMMENT_CLOSE '%'
@@ -62,3 +63,4 @@ extern struct node_t* d_expand(struct node_t* node, bool* loop, struct array_t* 
 extern struct node_t* d_evaluate(struct node_t* node, bool* loop, struct array_t* mac_array, struct array_t* str_array);
 extern struct node_t* d_display(struct node_t* node, bool* loop, struct array_t* mac_array, struct array_t* str_array);
 extern struct node_t* d_tree(struct node_t* node, bool* loop, struct array_t* mac_array, struct array_t* str_array);
+extern struct node_t* d_discard(struct node_t* node, bool* loop, struct array_t* mac_array, struct array_t* str_array);

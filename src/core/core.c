@@ -36,14 +36,9 @@ struct node_t* update_node_parent(struct node_t* node, struct node_t* parent) {
 	switch (node->type) {
 		default:		break;
 		case Function:	update_node_parent(node->body, node); break;
-		case Directive: update_node_parent(node->next, node); break;
 		case Application:
 			update_node_parent(node->func, node);
 			update_node_parent(node->arg, node);
-			break;
-		case Loop:
-			update_node_parent(node->start, node);
-			update_node_parent(node->next, node);
 			break;
 	}
 

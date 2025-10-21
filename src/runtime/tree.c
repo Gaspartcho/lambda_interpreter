@@ -117,8 +117,8 @@ bool build_tree(struct tree_image_t* image, struct node_t* node) {
 			bool shift_f = build_tree(&func_image, node->func);
 			bool shift_a = build_tree(&arg_image, node->arg);
 
-			bool squash = (((IMAGE_ELEM(&func_image, func_image.height - 1, shift_f) & VAR_FLAG) && (node->func->type != Application)) || (func_image.height < arg_image.height)) &&
-						  (((IMAGE_ELEM(&arg_image, arg_image.height - 1, shift_a) & VAR_FLAG) && (node->arg->type != Application)) || (func_image.height > arg_image.height));
+			bool squash = (((IMAGE_ELEM(&func_image, func_image.height - 1, shift_f) & VAR_FLAG) && !(IMAGE_ELEM(&func_image, func_image.height - 1, shift_f) & APPL_B_FLAG)) || (func_image.height < arg_image.height)) &&
+						  (((IMAGE_ELEM(&arg_image, arg_image.height - 1, shift_a) & VAR_FLAG) && !(IMAGE_ELEM(&arg_image, arg_image.height - 1, shift_a) & APPL_B_FLAG)) || (func_image.height > arg_image.height));
 
 			resize_image(image, func_image.width + arg_image.width + 1, MAX(func_image.height, arg_image.height) + (squash ? 0 : 1));
 			paste_image(image, &func_image, 0, 0);

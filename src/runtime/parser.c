@@ -58,7 +58,7 @@ bool pattern_macro_name(char c) {
 }
 
 bool pattern_directive_name(char c) {
-	return c == INCLUDE || c == EXPAND || c == FACTORIZE || c == MACRO || c == DISPLAY || c == TREE || c == EVAL || c == ASK || c == IDENTITY;
+	return c == INCLUDE || c == EXPAND || c == FACTORIZE || c == MACRO || c == DISPLAY || c == TREE || c == EVAL || c == ASK || c == IDENTITY || c == DISCARD;
 }
 
 bool pattern_string(char c) {
@@ -180,6 +180,7 @@ struct node_t* parse_directive(struct parser_t* parser) {
 			case EVAL:		s_dire->dire = d_evaluate; break;
 			case DISPLAY:	s_dire->dire = d_display; break;
 			case TREE:		s_dire->dire = d_tree; break;
+			case DISCARD:	s_dire->dire = d_discard; break;
 
 			default:
 				error_c(E_INV_TOK, syms[i]);
@@ -203,7 +204,7 @@ struct node_t* parse_directive(struct parser_t* parser) {
 		return NULL;
 	}
 
-	n_dire = n_dire->next;
+	n_dire				 = n_dire->next;
 	n_dire->parent->next = NULL;
 	free_node(n_dire->parent);
 
