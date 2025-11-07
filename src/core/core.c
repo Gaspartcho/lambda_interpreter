@@ -31,11 +31,11 @@ struct node_t* update_node_parent(struct node_t* node, struct node_t* parent) {
 
 	if (node == NULL) return NULL;
 
-	node->parent = parent;
+	if(node->parent != parent) node->parent = parent;
 
 	switch (node->type) {
-		default:		break;
-		case Function:	update_node_parent(node->body, node); break;
+		default:	   break;
+		case Function: update_node_parent(node->body, node); break;
 		case Application:
 			update_node_parent(node->func, node);
 			update_node_parent(node->arg, node);

@@ -76,6 +76,7 @@ extern struct node_t* apply_directive(struct node_t* node, struct node_t* direct
 extern struct node_t* beta_reduce(struct node_t* node, bool* changed, struct array_t* mac_array, struct array_t* str_array);
 extern struct node_t* mu_factorize(struct node_t* node, bool* changed, struct array_t* mac_array);
 extern struct node_t* mu_expand(struct node_t* node, bool* changed, struct array_t* mac_array);
-extern bool			  is_node_self_contained(struct node_t* node, struct array_t* var_array);
-extern bool			  is_beta_normal(struct node_t* node);
-extern bool			  are_node_equal(struct node_t* node_1, struct node_t* node_2);
+
+extern bool is_node_self_contained(struct node_t* node, struct array_t* var_array);
+extern bool is_beta_normal(struct node_t* node);
+extern bool are_node_equal(struct node_t* node_1, struct node_t* node_2);

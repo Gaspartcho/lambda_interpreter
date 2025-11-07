@@ -45,7 +45,6 @@ void exec_file(FILE* file, bool interactive, struct array_t* mac_array, struct a
 		}
 
 		if (interactive && !are_node_equal(node, null_node)) {
-
 			char* name = get_node_str(update_node_depth(node));
 			printf("%s\n", name);
 			free(name);
