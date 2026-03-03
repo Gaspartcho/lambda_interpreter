@@ -1,4 +1,4 @@
-# Specification for the Lambda prog (\lprog) language
+# Specification for the Lambda prog (\lprog) language (WIP)
 
 This is the official \lprog language specification document
 

@@ -1,7 +1,6 @@
 (* "std/std.lp")
 
 
-(@[$] FORMULA \a, b, c, d. (IMPL a (IMPL b (IMPL c (IMPL d a)))))
 
 (DEF_DIS GEN_BOOL \n, i. (LEQ (MOD i (POW TWO n)) (PREC (POW TWO (PREC n)))))
 
@@ -30,5 +29,6 @@
 (DEF_DIS TAUTOLOGY \formula, nb_vars. (TAUTOLOGY_REC formula, nb_vars, (POW TWO nb_vars)))
 
 
+(@[$]# FORMULA \p, q. (OR p, (NOT p)))
 
-([$]# (TAUTOLOGY FORMULA, FOUR))
+([$]# (TAUTOLOGY FORMULA, TWO))
